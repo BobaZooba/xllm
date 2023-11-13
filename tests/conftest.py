@@ -110,9 +110,15 @@ def llama_lm_collator(llama_tokenizer: PreTrainedTokenizer) -> LMCollator:
 
 
 @pytest.fixture(scope="session")
-def training_arguments() -> TrainingArguments:
+def path_to_outputs(tmp_path_factory: TempPathFactory) -> str:
+    path = tmp_path_factory.mktemp("tmp") / "outputs/"
+    return os.path.abspath(path)
+
+
+@pytest.fixture(scope="session")
+def training_arguments(path_to_outputs: str) -> TrainingArguments:
     arguments = TrainingArguments(
-        output_dir="./outputs/",
+        output_dir=path_to_outputs,
         per_device_train_batch_size=2,
         gradient_accumulation_steps=2,
         warmup_steps=50,

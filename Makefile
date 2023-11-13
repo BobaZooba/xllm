@@ -103,12 +103,32 @@ mypy:  ## Run static code analyzer
 lint: check-codestyle mypy unit-test  ## Run all checks
 
 #* Develop
+.PHONY: check-version-var
+check-version-var:  ## Check version var is not default
+	@if [ "$(VERSION)" = "0.0.0" ]; then \
+		echo "VERSION is equal to default 0.0.0"; \
+		echo "Please specify correct version"; \
+		echo "For example:"; \
+		echo "make test-pypi-release VERSION=1.2.3"; \
+		exit 1; \
+	else \
+		exit 0; \
+	fi
+
 .PHONY: push-new-version
 push-new-version:  ## Push new version to the GitHub
+	make check-version-var
 	git add .
 	git commit -m "Release: $(VERSION)"
 	git tag $(VERSION) -m 'Adds tag $(VERSION) for pypi'
 	git push --tags origin main
+
+.PHONY: push-dev-version
+push-dev-version:  ## Push new dev version to the GitHub
+	make check-version-var
+	git add .
+	git commit -m "New dev version: $(VERSION)"
+	git push origin main
 
 .PHONY: delete-dist
 delete-dist:  ## Delete all dist builds

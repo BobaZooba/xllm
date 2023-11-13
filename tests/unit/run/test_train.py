@@ -6,7 +6,7 @@ from tests.helpers.constants import LLAMA_TOKENIZER_DIR
 from tests.helpers.patches import patch_from_pretrained_auto_causal_lm, patch_trainer_train
 
 
-def test_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str):
+def test_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str, path_to_outputs: str):
     config = Config(
         push_to_hub=False,
         deepspeed_stage=0,
@@ -15,6 +15,7 @@ def test_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str)
         save_total_limit=0,
         max_steps=2,
         tokenizer_name_or_path=LLAMA_TOKENIZER_DIR,
+        output_dir=path_to_outputs,
     )
     with patch_from_pretrained_auto_causal_lm(monkeypatch=monkeypatch):
         with patch_trainer_train(monkeypatch=monkeypatch):

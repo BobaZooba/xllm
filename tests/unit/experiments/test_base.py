@@ -19,7 +19,7 @@ def test_base_experiment_init(monkeypatch: MonkeyPatch, path_to_train_dummy_data
         Experiment(config=config)
 
 
-def test_base_experiment_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str):
+def test_base_experiment_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str, path_to_outputs: str):
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
     config = Config(
         push_to_hub=False,
@@ -29,6 +29,7 @@ def test_base_experiment_train(monkeypatch: MonkeyPatch, path_to_train_prepared_
         save_total_limit=0,
         max_steps=2,
         tokenizer_name_or_path=LLAMA_TOKENIZER_DIR,
+        output_dir=path_to_outputs,
     )
 
     with patch_from_pretrained_auto_causal_lm(monkeypatch=monkeypatch):

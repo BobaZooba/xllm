@@ -119,11 +119,14 @@ class Experiment:
             self.before_eval_dataset_build()
             self.eval_dataset = self.build_eval_dataset()
             if self.eval_dataset is not None:
+                if self.training_arguments is not None:
+                    self.training_arguments.do_eval = True
+            if self.eval_dataset is not None:
                 dist_logger(
-                    f"Valid dataset {self.eval_dataset.__class__.__name__} was built. Size: {len(self.eval_dataset)}"
+                    f"Eval dataset {self.eval_dataset.__class__.__name__} was built. Size: {len(self.eval_dataset)}"
                 )
             else:
-                dist_logger("Valid dataset is None")
+                dist_logger("Eval dataset is None")
             self.after_eval_dataset_build()
 
         if self.tokenizer is None:

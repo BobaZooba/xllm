@@ -441,12 +441,12 @@ class Config:
     eval_delay: int = field(
         default=0,
         metadata={
-            "helps": "Number of epochs or steps to wait for before the first "
+            "help": "Number of epochs or steps to wait for before the first "
             "evaluation can be performed, depending on the evaluation_strategy"
         },
     )
     eval_steps: Optional[int] = field(
-        default=1_000, metadata={"helps": "Number of update steps between two evaluations"}
+        default=1_000, metadata={"help": "Number of update steps between two evaluations"}
     )
     warmup_steps: int = field(
         default=1_000,

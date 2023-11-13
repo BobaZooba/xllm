@@ -72,7 +72,7 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
                 json.dump(tokenizer_config, file_object, indent=2)
         logger.info(f"Model saved locally to {config.fused_model_local_path}")
 
-    if config.push_to_hub:
+    if config.push_to_hub or config.hub_model_id is not None:
         logger.info(f"Pushing model to the hub {config.hub_model_id}")
         if config.hub_model_id is not None:
             tokenizer.push_to_hub(
