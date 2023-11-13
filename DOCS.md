@@ -16,6 +16,10 @@
 
 ## How to implement experiment
 
+## How to extend config
+
+Details here: [How to extend config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-extend-config)
+
 # Build your own project using X—LLM
 
 ## Требования к формату выхода примеров

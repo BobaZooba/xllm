@@ -50,14 +50,14 @@ by engineers who understand your needs.
 - Supported many 🤗 Transformers models
   like `Yi-34B`, `Mistal AI`, `Llama 2`, `Zephyr`, `OpenChat`, `Falcon`, `Phi`, `Qwen`, `MPT` and many more
 - Benefit from cutting-edge advancements in LLM training optimization
-- QLoRA and fusing
-- Flash Attention 2
-- Gradient checkpointing
-- bitsandbytes
-- GPTQ (including post-training quantization)
-- DeepSpeed
-- FSDP
-- And many more
+  - QLoRA and fusing
+  - Flash Attention 2
+  - Gradient checkpointing
+  - bitsandbytes
+  - GPTQ (including post-training quantization)
+  - DeepSpeed
+  - FSDP
+  - And many more
 
 # Quickstart 🦖
 
@@ -464,7 +464,7 @@ python3 MY_PROJECT/cli/fuse.py \
 4. [Optional] GPTQ quantization of the trained model with fused LoRA
 
   ```bash
-python3 MY_PROJECT/cli/gptq_quantize.py \
+python3 MY_PROJECT/cli/quantize.py \
     --model_name_or_path ./fused_model/ \
     --apply_lora False \
     --stabilize False \
@@ -526,6 +526,7 @@ To get a handle on building your project with `X—LLM`, check out the materials
   into your own project
 - [Template project](https://github.com/BobaZooba/xllm-template): here's a template, a kickoff point you can use for
   your project
+- [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
 
 # Config 🔧
 
