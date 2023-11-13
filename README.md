@@ -115,8 +115,8 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 
   ```python
   config = Config(
-  model_name_or_path="openchat/openchat_3.5",
-  apply_lora=True,
+    model_name_or_path="openchat/openchat_3.5",
+    apply_lora=True,
   )
   ```
 
@@ -124,13 +124,13 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 
   ```python
   config = Config(
-  model_name_or_path="openchat/openchat_3.5",
-  apply_lora=True,
-  lora_rank=8,
-  lora_alpha=32,
-  lora_dropout=0.05,
-  raw_lora_target_modules="all",
-  # Names of modules to apply LoRA. A comma-separated string, for example: "k,q,v" or "all".
+    model_name_or_path="openchat/openchat_3.5",
+    apply_lora=True,
+    lora_rank=8,
+    lora_alpha=32,
+    lora_dropout=0.05,
+    raw_lora_target_modules="all",
+    # Names of modules to apply LoRA. A comma-separated string, for example: "k,q,v" or "all".
   )
   ```
 
@@ -145,10 +145,10 @@ To train the `QLoRA` model, we need to load the backbone model using `bitsandbyt
 
   ```python
   config = Config(
-  model_name_or_path="01-ai/Yi-34B",
-  apply_lora=True,
-  load_in_4bit=True,
-  prepare_model_for_kbit_training=True,
+    model_name_or_path="01-ai/Yi-34B",
+    apply_lora=True,
+    load_in_4bit=True,
+    prepare_model_for_kbit_training=True,
   )
   ```
 
@@ -156,14 +156,14 @@ To train the `QLoRA` model, we need to load the backbone model using `bitsandbyt
 
   ```python
   config = Config(
-  model_name_or_path="01-ai/Yi-34B",
-  apply_lora=True,
-  load_in_4bit=True,
-  prepare_model_for_kbit_training=True,
-  llm_int8_threshold=6.0,
-  llm_int8_has_fp16_weight=True,
-  bnb_4bit_use_double_quant=True,
-  bnb_4bit_quant_type="nf4",
+    model_name_or_path="01-ai/Yi-34B",
+    apply_lora=True,
+    load_in_4bit=True,
+    prepare_model_for_kbit_training=True,
+    llm_int8_threshold=6.0,
+    llm_int8_has_fp16_weight=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
   )
   ```
 
@@ -177,8 +177,8 @@ with LoRA and GPUs that support `bfloat16`.
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  stabilize=True,
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    stabilize=True,
   )
   ```
 
@@ -191,11 +191,11 @@ Before that, you must log in to `Huggingface Hub` or add an `API Token` to the e
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  push_to_hub=True,
-  hub_private_repo=True,
-  hub_model_id="BobaZooba/AntModel-7B-XLLM-Demo-LoRA",
-  save_steps=25,
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    push_to_hub=True,
+    hub_private_repo=True,
+    hub_model_id="BobaZooba/AntModel-7B-XLLM-Demo-LoRA",
+    save_steps=25,
   )
   ```
 
@@ -211,10 +211,10 @@ Before that, you must log in to `W&B` or add an `API Token` to the environment v
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  report_to_wandb=True,
-  wandb_project="xllm-demo",
-  wandb_entity="bobazooba",
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    report_to_wandb=True,
+    wandb_project="xllm-demo",
+    wandb_entity="bobazooba",
   )
   ```
 
@@ -230,8 +230,8 @@ You will be training larger models (for example 7B in colab), but at the expense
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  use_gradient_checkpointing=True,
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    use_gradient_checkpointing=True,
   )
   ```
 
@@ -247,15 +247,24 @@ install `flash-attn` for this. This can be done using:
 
   ```python
   config = Config(
-  model_name_or_path="meta-llama/Llama-2-7b-hf",
-  use_flash_attention_2=True,
+    model_name_or_path="meta-llama/Llama-2-7b-hf",
+    use_flash_attention_2=True,
   )
   ```
 
 </details>
 
 <details>
-  <summary>Combine all</summary>
+  <summary><b>Recommended setup</b></summary>
+
+## Recommendations
+- It is recommended to use at least the ``stabilize`` feature and `use_flash_attention_2` (if your GPU allows it).
+- Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs and, moreover, helps very effectively combat catastrophic forgetting.
+- Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces memory consumption.
+- Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but at the expense of slowing down training.
+- If your project allows, I suggest enabling `push_to_hub` and `hub_private_repo`, also specifying the model name in `hub_model_id` and `save_steps`. Example: "BobaZooba/SupaDupaLlama-7B-LoRA". During training, every checkpoint of your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be saved, which you can later easily fuse with the main model, for example, using `xllm`.
+- I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B) and `wandb_entity` (user or organization name in W&B).
+- Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the token (`HUGGING_FACE_HUB_TOKEN`) in the .env file. Similarly, when using `report_to_wandb`, you will need to log in to W&B. You can either specify the token (`WANDB_API_KEY`) in the .env file or you will be prompted to enter the token on the command line.
 
 ### Features
 
@@ -268,31 +277,34 @@ install `flash-attn` for this. This can be done using:
 
   ```python
   config = Config(
-  model_name_or_path="meta-llama/Llama-2-7b-hf",
-  use_gradient_checkpointing=True,
-  stabilize=True,
-  use_flash_attention_2=True,
-  load_in_4bit=True,
-  prepare_model_for_kbit_training=True,
-  apply_lora=True,
-  warmup_steps=1000,
-  max_steps=10000,
-  logging_steps=1,
-  save_steps=1000,
+    model_name_or_path="meta-llama/Llama-2-7b-hf",
+    tokenizer_padding_side="right",  # good for llama2
+  
+    warmup_steps=1000,
+    max_steps=10000,
+    logging_steps=1,
+    save_steps=1000,
+    per_device_train_batch_size=2,
+    gradient_accumulation_steps=2,
+    max_length=2048,
+  
+    stabilize=True,
+    use_flash_attention_2=True,
+  
+    apply_lora=True,
+  
+    load_in_4bit=True,
+    prepare_model_for_kbit_training=True,
+  
+    use_gradient_checkpointing=True,
 
-  per_device_train_batch_size=2,
-  gradient_accumulation_steps=2,
-  max_length=2048,
+    push_to_hub=False,
+    hub_private_repo=True,
+    hub_model_id="BobaZooba/SupaDupaLlama-7B-LoRA",
 
-  tokenizer_padding_side="right",  # good for llama2
-
-  push_to_hub=False,
-  hub_private_repo=True,
-  hub_model_id="BobaZooba/SupaDupaLlama-7B-LoRA",
-
-  report_to_wandb=False,
-  wandb_project="xllm-demo",
-  wandb_entity="bobazooba",
+    report_to_wandb=False,
+    wandb_project="xllm-demo",
+    wandb_entity="bobazooba",
   )
   ```
 
@@ -307,9 +319,9 @@ You can explicitly specify to fuse the model after training.
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  apply_lora=True,
-  fuse_after_training=True,
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    apply_lora=True,
+    fuse_after_training=True,
   )
   ```
 
@@ -317,11 +329,11 @@ Even when you are using QLoRa
 
   ```python
   config = Config(
-  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  apply_lora=True,
-  load_in_4bit=True,
-  prepare_model_for_kbit_training=True,
-  fuse_after_training=True,
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    apply_lora=True,
+    load_in_4bit=True,
+    prepare_model_for_kbit_training=True,
+    fuse_after_training=True,
   )
   ```
 
@@ -345,14 +357,14 @@ the `command line`.
 `train.py`
 
   ```python
-  from xllm import Config
-  from xllm.datasets import GeneralDataset
-  from xllm.cli import cli_run_train
+from xllm import Config
+from xllm.datasets import GeneralDataset
+from xllm.cli import cli_run_train
 
-  if __name__ == '__main__':
-  train_data = ["Hello!"] * 100
-  train_dataset = GeneralDataset.from_list(data=train_data)
-  cli_run_train(config_cls=Config, train_dataset=train_dataset)
+if __name__ == '__main__':
+    train_data = ["Hello!"] * 100
+    train_dataset = GeneralDataset.from_list(data=train_data)
+    cli_run_train(config_cls=Config, train_dataset=train_dataset)
   ```
 
 Run train (in the `num_gpus` parameter, specify as many GPUs as you have)
@@ -364,11 +376,11 @@ Run train (in the `num_gpus` parameter, specify as many GPUs as you have)
 You also can pass other parameters
 
   ```bash
-  deepspeed --num_gpus=8 train.py \
-  --deepspeed_stage 2 \
-  --apply_lora True \
-  --stabilize True \
-  --use_gradient_checkpointing True
+deepspeed --num_gpus=8 train.py \
+    --deepspeed_stage 2 \
+    --apply_lora True \
+    --stabilize True \
+    --use_gradient_checkpointing True
   ```
 
 </details>
@@ -402,60 +414,60 @@ will look something like this:
 1. Downloading and preparing data and model
 
   ```bash
-  python3 MY_PROJECT/cli/prepare.py \
-  --dataset_key MY_DATASET \
-  --model_name_or_path mistralai/Mistral-7B-v0.1 \
-  --path_to_env_file ./.env
+python3 MY_PROJECT/cli/prepare.py \
+    --dataset_key MY_DATASET \
+    --model_name_or_path mistralai/Mistral-7B-v0.1 \
+    --path_to_env_file ./.env
   ```
 
 2. Run train using DeepSpeed on multiple GPUs
 
   ```bash
-  deepspeed --num_gpus=8 MY_PROJECT/cli/train.py \
-  --use_gradient_checkpointing True \
-  --deepspeed_stage 2 \
-  --stabilize True \
-  --model_name_or_path mistralai/Mistral-7B-v0.1 \
-  --use_flash_attention_2 False \
-  --load_in_4bit True \
-  --apply_lora True \
-  --raw_lora_target_modules all \
-  --per_device_train_batch_size 8 \
-  --warmup_steps 1000 \
-  --save_total_limit 0 \
-  --push_to_hub True \
-  --hub_model_id MY_HF_HUB_NAME/LORA_MODEL_NAME \
-  --hub_private_repo True \
-  --report_to_wandb True \
-  --path_to_env_file ./.env
+deepspeed --num_gpus=8 MY_PROJECT/cli/train.py \
+    --use_gradient_checkpointing True \
+    --deepspeed_stage 2 \
+    --stabilize True \
+    --model_name_or_path mistralai/Mistral-7B-v0.1 \
+    --use_flash_attention_2 False \
+    --load_in_4bit True \
+    --apply_lora True \
+    --raw_lora_target_modules all \
+    --per_device_train_batch_size 8 \
+    --warmup_steps 1000 \
+    --save_total_limit 0 \
+    --push_to_hub True \
+    --hub_model_id MY_HF_HUB_NAME/LORA_MODEL_NAME \
+    --hub_private_repo True \
+    --report_to_wandb True \
+    --path_to_env_file ./.env
   ```
 
 3. Fuse LoRA
 
   ```bash
-  python3 MY_PROJECT/cli/fuse.py \
-  --model_name_or_path mistralai/Mistral-7B-v0.1 \
-  --lora_hub_model_id MY_HF_HUB_NAME/LORA_MODEL_NAME \
-  --hub_model_id MY_HF_HUB_NAME/MODEL_NAME \
-  --hub_private_repo True \
-  --force_fp16 True \
-  --fused_model_local_path ./fused_model/ \
-  --path_to_env_file ./.env
+python3 MY_PROJECT/cli/fuse.py \
+    --model_name_or_path mistralai/Mistral-7B-v0.1 \
+    --lora_hub_model_id MY_HF_HUB_NAME/LORA_MODEL_NAME \
+    --hub_model_id MY_HF_HUB_NAME/MODEL_NAME \
+    --hub_private_repo True \
+    --force_fp16 True \
+    --fused_model_local_path ./fused_model/ \
+    --path_to_env_file ./.env
   ```
 
 4. [Optional] GPTQ quantization of the trained model with fused LoRA
 
   ```bash
-  python3 MY_PROJECT/cli/gptq_quantize.py \
-  --model_name_or_path ./fused_model/ \
-  --apply_lora False \
-  --stabilize False \
-  --quantization_max_samples 128 \
-  --quantized_model_path ./quantized_model/ \
-  --prepare_model_for_kbit_training False \
-  --quantized_hub_model_id MY_HF_HUB_NAME/MODEL_NAME_GPTQ \
-  --quantized_hub_private_repo True \
-  --path_to_env_file ./.env
+python3 MY_PROJECT/cli/gptq_quantize.py \
+    --model_name_or_path ./fused_model/ \
+    --apply_lora False \
+    --stabilize False \
+    --quantization_max_samples 128 \
+    --quantized_model_path ./quantized_model/ \
+    --prepare_model_for_kbit_training False \
+    --quantized_hub_model_id MY_HF_HUB_NAME/MODEL_NAME_GPTQ \
+    --quantized_hub_private_repo True \
+    --path_to_env_file ./.env
   ```
 
 </details>
@@ -475,14 +487,14 @@ At the same time, you always have an easy way to submit data for language modeli
   <summary>Example</summary>
 
   ```python
-  from xllm import Config
-  from xllm.datasets import GeneralDataset
-  from xllm.cli import cli_run_train
+from xllm import Config
+from xllm.datasets import GeneralDataset
+from xllm.cli import cli_run_train
 
-  if __name__ == '__main__':
-  train_data = ["Hello!"] * 100
-  train_dataset = GeneralDataset.from_list(data=train_data)
-  cli_run_train(config_cls=Config, train_dataset=train_dataset)
+if __name__ == '__main__':
+    train_data = ["Hello!"] * 100
+    train_dataset = GeneralDataset.from_list(data=train_data)
+    cli_run_train(config_cls=Config, train_dataset=train_dataset)
   ```
 
 </details>

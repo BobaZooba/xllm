@@ -51,3 +51,5 @@ the same data and models on each GPU, when you only need to do it once.
 # Дополнительные комментарии
 
 ## FAQ
+
+# DeepSpeed and push_to_hub
