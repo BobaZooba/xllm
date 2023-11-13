@@ -2,19 +2,347 @@
 
 План
 
-# How to
+
+# Steps
+
+Using `X—LLM` to train a model is simple and involves these few steps:
+
+1. `Prepare` — Get the data and the model ready by downloading and preparing them. Saves data locally
+   to `config.train_local_path_to_data` and `config.eval_local_path_to_data` if you are using eval dataset
+2. `Train` — Use the data prepared in the previous step to train the model
+3. `Fuse` — If you used LoRA during the training, fuse LoRA
+4. `Quantize` — Make your model take less memory by quantizing it
+
+## Prepare
+
+At this step, the following occurs:
+
+- Downloading and preparing data
+- Downloading the model
+
+We've separated this as a distinct step for a few reasons, chief among them being: if you're utilizing distributed training across several GPUs - for instance via DeepSpeed - you would otherwise end up redundantly downloading the dataset and model on each individual GPU, even though you only need to do it once.
+
+### Results of this step
+- Prepared data (training and optionally eval), which are stored locally on the machine at the corresponding paths: `train_local_path_to_data` и `eval_local_path_to_data`
+- A model downloaded to the local cache (typical model download from the Hugging Face Hub)
+
+## Train
+
+At this step, model training occurs, which is controlled through `Config`. More information on how to better create a config can be learned here:
+- [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
+- [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
+- [Detailed description of all config fields](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#detailed-config-explanation)
+
+### Data pipeline
+
+What happens to the data? One step of training is described below
+
+- Each sample is transformed into a dictionary with specified keys in the get_sample method of the Dataset
+- A batch is assembled, and the batch goes through a collator, which is responsible for `tokenization`, `label preparation`, in other words, for **preparing the input data for the model**. The collator knows which keys it needs to accept as input and how to process each key
+- The batch is processed by the `compute_loss` method of the `Trainer`, and this method returns the `loss`. A `backward` operation is performed based on the `loss`
+
+### Results of this step
+
+- Model artifacts like local checkpoints and/or Huggingface Hub checkpoints
+- _[Optional]_ Training artifacts in W&B like loss curve
+
+## Fuse
+
+This step is only necessary if you trained the model using the `LoRA` adapter and want to obtain the ready for inference and fused model.
+
+### Results of this step
+
+- Fused model locally and/or in Hugging Face Hub
+
+## Quantize
+
+In this step, post-training quantization of the model occurs using [auto-gptq](https://github.com/PanQiWei/AutoGPTQ). For this, you will need to install `auto-gptq`, for example, like this:
+
+```bash
+pip install xllm[train]
+```
+
+This method allows for a significant reduction in the size of the model and a slight increase in speed at the cost of a small decrease in accuracy. For example, the Mistral model is reduced from 15GB to 4.3GB.
+
+### Results of this step
+- Quantized model locally and/or in Hugging Face Hub
+
+# How to add CLI tools to your project
+
+It is advisable to add `xllm` CLI functions to your project to simplify all the steps above.
+
+Also, please check [Template project](https://github.com/BobaZooba/xllm-template).
+
+### Project structure
+
+```txt
+my_project
+  cli
+    __init__.py
+    prepare.py
+    train.py
+    fuse.py
+    quantize.py
+  core
+    ...
+  __init__.py
+```
+
+### Files
+
+`prepare.py`
+
+```python
+from xllm.cli import cli_run_prepare
+
+if __name__ == "__main__":
+    cli_run_prepare()
+```
+
+`train.py`
+
+```python
+from xllm.cli import cli_run_train
+
+if __name__ == "__main__":
+    cli_run_train()
+```
+
+`fuse.py`
+
+```python
+from xllm.cli import cli_run_fuse
+
+if __name__ == "__main__":
+    cli_run_fuse()
+```
+
+`quantize.py`
+
+```python
+from xllm.cli import cli_run_quantize
+
+if __name__ == "__main__":
+    cli_run_quantize()
+```
+
+### Run
+
+More detailed examples here: [Production soluton](https://github.com/BobaZooba/xllm#production-solution-)
+
+```bash
+python my_project/cli/prepare.py --model_name_or_path mistralai/Mistral-7B-v0.1
+python my_project/cli/train.py --model_name_or_path mistralai/Mistral-7B-v0.1
+python my_project/cli/fuse.py --model_name_or_path mistralai/Mistral-7B-v0.1
+python my_project/cli/quantize.py --model_name_or_path mistralai/Mistral-7B-v0.1
+```
+
+You also could run train via DeepSpeed (if you have multiple GPUs on your machine):
+```bash
+deepspeed --num_gpus=8 my_project/cli/train.py --model_name_or_path
+```
+
+### Registry
+
+You can implement `datasets`, `collators`, `trainers`, and `experiments`. Here, you will learn how to make the above CLI functions aware of the new components.
+
+Available registries:
+```python
+from xllm.datasets import datasets_registry
+from xllm.collators import collators_registry
+from xllm.trainers import trainers_registry
+from xllm.experiments import experiments_registry
+```
+
+Add the new dataset to the registry:
+```python
+from xllm.datasets import datasets_registry
+
+datasets_registry.add(key="my_new_dataset", value=MyDataset)
+```
+
+This code should be added before the invocation of CLI functions. For example:
+
+`my_project/core/registry.py`
+
+```python
+from xllm.datasets import datasets_registry
+
+from dataset import MyDataset
+
+def registry_components():
+    datasets_registry.add(key="my_new_dataset", value=MyDataset)
+```
+
+`my_project/cli/prepare.py`
+
+```python
+from xllm.cli import cli_run_prepare
+
+from my_project.core.registry import registry_components
+
+if __name__ == "__main__":
+    registry_components()
+    cli_run_prepare()
+```
+
+`my_project/cli/train.py`
+
+```python
+
+from xllm.cli import cli_run_train
+
+from my_project.core.registry import registry_components
+
+if __name__ == "__main__":
+    registry_components()
+    cli_run_train()
+```
+
+#### Run
+
+```bash
+python my_project/cli/prepare.py --dataset_key my_new_dataset
+python my_project/cli/train.py --dataset_key my_new_dataset
+```
+
+You could extend registy with different components:
+
+`registry.py`
+
+```python
+from xllm.datasets import datasets_registry
+from xllm.collators import collators_registry
+from xllm.trainers import trainers_registry
+from xllm.experiments import experiments_registry
+
+from my_project.core.dataset import MyDataset
+from my_project.core.collator import MyCollator
+from my_project.core.trainer import MyTrainer
+from my_project.core.experiment import MyExperiment
+
+def registry_components():
+    datasets_registry.add(key="my_new_dataset", value=MyDataset)
+    collators_registry.add(key="my_new_collator", value=MyCollator)
+    trainers_registry.add(key="my_new_trainer", value=MyTrainer)
+    experiments_registry.add(key="my_new_experiment", value=MyExperiment)
+```
+
+# Customization
+
+You have the flexibility to tweak many aspects of your model's training: data, how data is processed, trainer, config,
+how the model is loaded, what happens before and after training, and so much more.
+
+We've got ready-to-use components for every part of the `xllm` pipeline. You can entirely switch out some components
+like the dataset, collator, trainer, and experiment.
+For some components like experiment and config, you have the option to just build on what's already there.
 
 ## How to implement dataset
 
-Берешь и делаешь
+Dataset is the most basic component in `xllm`. With this component we can describe the logic of how and from where the data should be loaded, how they should be preprocessed and in what form they should be presented further throughout the training pipeline.
 
-## How to add CLI tools to your project
+Each dataset should be inherited from `xllm.datasets.base.BaseDataset`
+
+It can be imported like this:
+
+```python
+from xllm.datasets import BaseDataset
+```
+
+In each new dataset, we must implement two methods:
+- get_data
+- get_sample
+
+
+Let's start implementing new dataset
+```python
+from typing import Optional, Tuple, List
+
+from xllm import Config
+from xllm.datasets import BaseDataset
+from xllm.types import RawSample
+
+
+class MyDataset(BaseDataset):
+
+    def get_data(cls, config: Config) -> Optional[Tuple[List[RawSample], Optional[List[RawSample]]]]:
+        ...
+
+    def get_sample(self, index: int) -> RawSample:
+        ...
+```
+
+### `get_data`
+
+The input values of this method are cls from `MyDataset` and `Config`. By default, the default config from `xllm` is used: `from xllm import Config`
+
+The `get_data` method should return a tuple of two elements: **training data** and **eval data**. These data should be lists of type `RawSample`. `RawSample`, in turn, is simply an alias for the following type: `Dict[str, Union[str, int, float, List[str]]]`. In other words, each sample in the data should be a dictionary, where the keys are strings, and the values can be `str`, `int`, `float`, or `list of str`.
+
+The structure of `RawSample` can be arbitrary, with arbitrary keys. Later in the `get_sample` step, we will be transforming this dictionary into the required construction.
+
+Eval data can be `None`, while training data must definitely be a list of `RawSample` elements. We can start training without eval data, but we cannot start it without training data.
+
+In the type annotation for the output data of this method, it is indicated that the output can be simply `None`. This is not recommended behavior, but it is possible if you do not need to download and preprocess data at all.
+
+#### Why download data?
+Typically, we use rented machines for training. This involves a number of necessary steps, such as downloading a dataset. The xllm library suggests implementing this as a separate step to facilitate project deployment in such variable conditions.
+
+Training data can be shuffled if specified in the config by the shuffle key. By default, shuffling occurs.
+
+#### When the method is called and what is the result
+The method is called during the prepare step and saves the resulting datasets into the corresponding paths of the config: `train_local_path_to_data` and `eval_local_path_to_data`. These data will later be loaded in subsequent steps, such as train.
+
+#### If in Config eval_local_path_to_data is set to None
+In this case, if `add_eval_to_train_if_no_path` is indicated in the config, then these data will be added to the training data.
+
+Also, if the size of evaluation data is greater than the value in the config `max_eval_samples`, then eval data will be truncated to this value, and the remaining evaluation data will be added to the training data.
+
+### `get_sample`
+
+This method converts data from the previous step into data for working with `xllm`. In `xllm`, we always use a component such as Collator. It is responsible for tokenization, preparing labels for the model, that is, to gather samples from `Dataset` and transform them into a batch for the model.
+
+#### What should a sample look like?
+
+We mentioned earlier that the `Collator` takes samples of a certain structure as input. In its simplest form, this structure looks like this:
+
+```python
+{
+    "text_parts": [
+        "Hello!",
+        "My name is Boris"
+    ]
+}
+```
+
+Thus, each sample is a dictionary with the key `text_parts`, and the value is a `list of strings`. Ultimately, in the `Collator`, the list of texts is converted into text using a specified separator. In `CompletionCollator`, we calculate `loss` (train the model) only for the last text in the list, that is, the last utterance (of the assistant) in the dialogue. Also, a list of texts allows for easier customization of the dialogue and the use of different separators for these texts.
+
+In the `Dataset`, there is a parameter called `must_have_keys`. Each sample is checked before being fed into the Collator to ensure it contains all `must_have_keys`; otherwise, an exception is thrown.
+
+#### Change both `Collator` and `Dataset`
+
+We can complicate our data, for example, for PPO training. In such a case, we need to implement both `Dataset` and `Collator` (and even `Trainer`) for it right away. The implementation of your own collator is described below.
+
+### Registry
+
+The last important detail is the `datasets_registry`. We have implemented a new dataset and now want to use it while training through the command line. How do we do that? It is necessary to add the new dataset to the `datasets_registry`.
+
+
+
+
+
+
 
 ## How to implement collator
 
+### Registry
+
 ## How to implement trainer
 
+### Registry
+
 ## How to implement experiment
+
+### Registry
 
 ## How to extend config
 

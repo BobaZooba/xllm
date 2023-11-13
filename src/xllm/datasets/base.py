@@ -66,6 +66,9 @@ class BaseDataset(Dataset[RawSample], ABC):
             random.shuffle(train_data)
             logger.info("Train data shuffled")
 
+        if len(train_data) == 0:
+            raise ValueError("Train data length is 0 at prepare step")
+
         with open(config.train_local_path_to_data, mode="w") as file_object:
             for raw_sample in train_data:
                 file_object.write(json.dumps(raw_sample) + "\n")
