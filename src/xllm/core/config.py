@@ -63,13 +63,13 @@ class Config:
     force_fp32: bool = field(
         default=False,
         metadata={
-            "help": "Force using fp32",
+            "help": "Force using fp32 when model loading",
         },
     )
     force_fp16: bool = field(
         default=False,
         metadata={
-            "help": "Force using fp16",
+            "help": "Force using fp16 when model loading",
         },
     )
     from_gptq: bool = field(
@@ -84,10 +84,10 @@ class Config:
             "help": "HuggingFace Hub token. You can also set this key using .env file",
         },
     )
-    deepspeed_stage: Union[int, str, None] = field(
+    deepspeed_stage: int = field(
         default=0,
         metadata={
-            "help": "DeepSpeed stage",
+            "help": "Predifined DeepSpeed stage",
         },
     )
     deepspeed_config_path: Optional[int] = field(
@@ -121,7 +121,7 @@ class Config:
         },
     )
     path_to_env_file: Optional[str] = field(
-        default=None,
+        default="./.env",
         metadata={"help": "Custom path to .env file"},
     )
 
@@ -184,8 +184,8 @@ class Config:
             "help": "The name of the model at the hub for GPTQ quantization. Example: BobaZooba/Shurale-GPTQ",
         },
     )
-    quantized_hub_private_repo: Optional[str] = field(
-        default=None,
+    quantized_hub_private_repo: bool = field(
+        default=True,
         metadata={
             "help": "Private repository for GPTQ quantization model or not",
         },
@@ -246,7 +246,7 @@ class Config:
     tokenizer_padding_side: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Padding side of the collator: right or left",
+            "help": "Padding side of the collator: None, right or left",
         },
     )
 
@@ -260,13 +260,13 @@ class Config:
     max_length: int = field(
         default=2048,
         metadata={
-            "help": "Max length of the model",
+            "help": "Max sequence length of the model",
         },
     )
 
     # model
     model_name_or_path: str = field(
-        default="meta-llama/Llama-2-7b-hf",
+        default="mistralai/Mistral-7B-v0.1",
         metadata={
             "help": "Model name or path. It could be from HuggingFace or locally",
         },
@@ -284,7 +284,7 @@ class Config:
         },
     )
     trust_remote_code: bool = field(
-        default=True,
+        default=False,
         metadata={
             "help": "Trust remote code from HuggingFace",
         },
@@ -438,18 +438,18 @@ class Config:
             "If None eval_accumulation_steps equals to gradient_accumulation_steps",
         },
     )
-    eval_delay: float = field(
+    eval_delay: int = field(
         default=0,
         metadata={
             "helps": "Number of epochs or steps to wait for before the first "
             "evaluation can be performed, depending on the evaluation_strategy"
         },
     )
-    eval_steps: Union[int, float, None] = field(
-        default=1000, metadata={"helps": "Number of update steps between two evaluations"}
+    eval_steps: Optional[int] = field(
+        default=1_000, metadata={"helps": "Number of update steps between two evaluations"}
     )
     warmup_steps: int = field(
-        default=1000,
+        default=1_000,
         metadata={
             "help": "Number of steps to warm up",
         },
@@ -519,7 +519,7 @@ class Config:
         metadata={
             "help": "Upload the model to the hub. "
             "The model will be uploaded to the hub every save_steps. "
-            "If LoRA is used, then LoRA's weights will be loaded onto the hub.",
+            "If LoRA is used, then LoRA's weights will be loaded onto the hub",
         },
     )
     hub_model_id: Optional[str] = field(
