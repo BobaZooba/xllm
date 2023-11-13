@@ -108,6 +108,8 @@ experiment.fuse_lora()
 experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 ```
 
+### How `Config` controls `xllm`
+
 <details>
   <summary>LoRA</summary>
 
@@ -257,7 +259,7 @@ install `flash-attn` for this. This can be done using:
 <details>
   <summary><b>Recommended setup</b></summary>
 
-## Recommendations
+#### Recommendations
 - It is recommended to use at least the ``stabilize`` feature and `use_flash_attention_2` (if your GPU allows it).
 - Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs and, moreover, helps very effectively combat catastrophic forgetting.
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces memory consumption.
@@ -266,7 +268,7 @@ install `flash-attn` for this. This can be done using:
 - I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B) and `wandb_entity` (user or organization name in W&B).
 - Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the token (`HUGGING_FACE_HUB_TOKEN`) in the .env file. Similarly, when using `report_to_wandb`, you will need to log in to W&B. You can either specify the token (`WANDB_API_KEY`) in the .env file or you will be prompted to enter the token on the command line.
 
-### Features
+#### Features
 
 - QLoRA
 - Gradient checkpointing
@@ -543,7 +545,7 @@ from xllm import Config
 
 ## Useful materials
 
-- [Important config fields for different steps](!link)
+- [Important config fields for different steps](https://github.com/BobaZooba/xllm#fast-prototyping-)
 - [How do I choose the methods for training?](!link)
 - [Detailed description of all config fields](!link)
 
