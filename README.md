@@ -600,10 +600,14 @@ well as funding for machine maintenance.
 
 # Future Work 🔮
 
-- Add more tests
-- Add [DPO](https://arxiv.org/abs/2305.18290) components
-- GPU CI using RunPod
+- Add code docs
+- Add more testst
 - Add RunPod deploy function
+- Add [DPO](https://arxiv.org/abs/2305.18290) components
+- Add Callbacks to `Experiment`
+- GPU CI using RunPod
+- Solve DeepSpeed + push_to_hub checkpoints bug
+- Make DeepSpeed Stage 3 + bitsandbytes works correc
 - Add multipacking
 - Add adaptive batch size
 - Fix caching in CI

@@ -1,3 +1,5 @@
+from xllm.types import RawSamplefrom typing import List
+
 # 🦖 X—LLM Documentation
 
 План
@@ -71,7 +73,12 @@ This method allows for a significant reduction in the size of the model and a sl
 
 It is advisable to add `xllm` CLI functions to your project to simplify all the steps above.
 
-Also, please check [Template project](https://github.com/BobaZooba/xllm-template).
+Also, please check:
+- [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
+  it
+  into your own project
+- [Template project](https://github.com/BobaZooba/xllm-template): here's a template, a kickoff point you can use for
+  your project
 
 ### Project structure
 
@@ -84,7 +91,11 @@ my_project
     fuse.py
     quantize.py
   core
-    ...
+    __init__.py
+    dataset.py
+    collator.py
+    trainer.py
+    experiment.py
   __init__.py
 ```
 
@@ -316,7 +327,7 @@ We mentioned earlier that the `Collator` takes samples of a certain structure as
 
 Thus, each sample is a dictionary with the key `text_parts`, and the value is a `list of strings`. Ultimately, in the `Collator`, the list of texts is converted into text using a specified separator. In `CompletionCollator`, we calculate `loss` (train the model) only for the last text in the list, that is, the last utterance (of the assistant) in the dialogue. Also, a list of texts allows for easier customization of the dialogue and the use of different separators for these texts.
 
-In the `Dataset`, there is a parameter called `must_have_keys`. Each sample is checked before being fed into the Collator to ensure it contains all `must_have_keys`; otherwise, an exception is thrown.
+In the `Dataset`, there is a parameter called `must_have_keys`. Each sample is checked before being fed into the `Collator` to ensure it contains all `must_have_keys`; otherwise, an exception is thrown. You can expand this list in the init method.
 
 #### Change both `Collator` and `Dataset`
 
@@ -326,57 +337,156 @@ We can complicate our data, for example, for PPO training. In such a case, we ne
 
 The last important detail is the `datasets_registry`. We have implemented a new dataset and now want to use it while training through the command line. How do we do that? It is necessary to add the new dataset to the `datasets_registry`.
 
-
-
-
-
-
+Please check this: [Registry](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#registry)
 
 ## How to implement collator
 
+It was mentioned earlier that typically `Collator` receives a list of elements like this:
+
+```python
+{
+    "text_parts": [
+        "Hello!",
+        "My name is Boris"
+    ]
+}
+```
+
+We can change the structure of the sample by implementing a new dataset, and we can also change the logic of processing this sample by implementing a new collator. 
+
+The main task of the collator is to convert a list of samples into a batch that can be input to the model. That is, to turn texts into a tokenized batch and create targets.
+
+Every collator must be inherited from `BaseCollator` and the method `parse_batch` must be implemented.
+
+```python
+from typing import List
+
+from xllm.types import RawSample, Batch
+from xllm.collators import BaseCollator
+
+
+class MyCollator(BaseCollator):
+    
+    def parse_batch(self, raw_batch: List[RawSample]) -> Batch:
+        ...
+```
+
+This method receives a list of samples that are output by the `Dataset`. Please read about the implementation of the dataset above if you have not done so already.
+
+Your task is to write the logic of how to process the list in order to eventually obtain a `Batch`. A `Batch` is a dictionary where the key is a string, and the value is a `PyTorch Tensor`.
+
+Similarly to the dataset, the collator also has `must_have_keys`, which you can expand in the init method.
+
+### `LMCollator`
+
+This collator is needed for simple language modeling. It compiles the lists of texts from each example into a single text by concatenating them using a separator.
+
+### `CompletionCollator`
+
+This collator is needed for cases when we want to calculate the loss only for the last text in the list. For example, these are instances of interacting with an assistant. We don't want to train the model on how the user speaks. We don't need the model to be able to imitate the user, so we construct the dataset in such a way that at the end of the list of texts (dialogue), there is a phrase by the assistant. Essentially, we will be training the model to generate these completions by the assistant.
+
 ### Registry
+
+You need to register your `Collator` in order to use it in `xllm` CLI functions.
+
+Please check this: [Registry](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#registry)
 
 ## How to implement trainer
 
+For users of the `transformers` library, this is the most familiar component. In it, we describe different logic within training. Typically, implementing a new component may be necessary to realize custom logic in the `compute_loss` method.
+
+Every `trainer` must be inherited from `transformers.Trainer`.
+
+```python
+from typing import Dict, Tuple, Union
+
+from torch import Tensor
+from peft import PeftModel
+from transformers import Trainer, PreTrainedModel
+
+class MyTrainer(Trainer):
+
+    def compute_loss(
+        self,
+        model: Union[PreTrainedModel, PeftModel],
+        inputs: Dict[str, Tensor],
+        return_outputs: bool = False,
+    ) -> Union[Tensor, Tuple[Tensor, Dict[str, Tensor]]]:
+        ...
+```
+
+### `LMTrainer`
+
+This is a trainer for language modeling training, but it also works properly with the `CompletionCollator` because the `CompletionCollator` forms targets in such a way that `loss` is ultimately calculated only for the last text in the list.
+
 ### Registry
+
+You need to register your `Trainer` in order to use it in `xllm` CLI functions.
+
+Please check this: [Registry](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#registry)
 
 ## How to implement experiment
 
+The experiment acts as an aggregator of all logic during training. It dictates how to load the model, what needs to be done before or after a certain step, for example, before initializing the `tokenizer`.
+
+Every `experiment` must be inherited from `xllm.experiments.base.Experiment`.
+
+The experiment does not have any abstract methods that must be implemented, but there are many methods that you can implement. And of course, you can override methods. In the future, it is planned to add callbacks.
+
+Methods:
+- before_checks
+- after_checks
+- before_training_arguments_build
+- after_training_arguments_build
+- after_training_arguments_build
+- build_train_dataset_additional_kwargs (must return dict)
+- after_train_dataset_build
+- before_eval_dataset_build
+- build_eval_dataset_additional_kwargs (must return dict)
+- after_eval_dataset_build
+- before_tokenizer_build
+- after_tokenizer_build
+- before_collator_build
+- build_collator_additional_kwargs (must return dict)
+- after_collator_build
+- before_quantization_config_build
+- after_quantization_config_build
+- before_model_build
+- after_model_build
+- before_bnb_quantization
+- after_bnb_quantization
+- before_lora_apply
+- after_lora_apply
+- before_stabilize_training
+- after_stabilize_training
+- before_trainer_build
+- build_trainer_additional_kwargs (must return dict)
+- after_trainer_build
+- before_train
+- after_fuse
+- after_train
+- at_beginning
+- at_end
+
+```python
+from xllm.experiments import Experiment
+
+class MyExperiment(Experiment):
+
+    def before_lora_apply(self) -> None:
+        # do whatever you want
+        ...
+```
+
 ### Registry
+
+You need to register your `Experiment` in order to use it in `xllm` CLI functions.
+
+Please check this: [Registry](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#registry)
 
 ## How to extend config
 
 Details here: [How to extend config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-extend-config)
-
-# Build your own project using X—LLM
-
-## Требования к формату выхода примеров
-
-### 1. Download
-
-First off, you must download the data and the model. This step also handles data preparation. You have to complete this
-necessary step because it sets up how your data will be downloaded and prepared.
-
-Before you start the training, it's crucial to get the data and the model ready. You won't be able to start training
-without them since this is the point where your data gets prepped for training. We made this a separate step for good
-reasons. For example, if you're training across multiple GPUs, like with DeepSpeed, you'd otherwise end up downloading
-the same data and models on each GPU, when you only need to do it once.
-
-#### 1.1 Implement your dataset
-
-#### 1.2 Register your dataset
-
-#### 1.3 Run the downloading
-
-### 2. Train
-
-### 3. Fuse
-
-Этот шаг нужен только в том случае, если вы обучали модель с использованием LoRA, что является рекомендуемым решением.
-
-### 4. GPTQ Quantization
-
-Это опциональный шаг
 
 # Config
 
@@ -535,7 +645,34 @@ python train.py \
 
 ## How to extend config
 
-TODO
+You may need to extend the config. To do this, you will need to inherit from the default config and write your own logic or add fields.
+
+`xllm_demo/core/config.py`
+
+```python
+from dataclasses import dataclass, field
+
+from xllm import Config
+
+@dataclass
+class DemoXLLMConfig(Config):
+    text_field: str = field(default="chosen", metadata={
+        "help": "Field for Antropic RLHF dataset",
+    })
+```
+
+Next, you will need to add this class to the xllm CLI function calls.
+
+`xllm_demo/cli/train.py`
+
+```python
+from xllm.cli import cli_run_train
+
+from xllm_demo.core.config import DemoXLLMConfig
+
+if __name__ == "__main__":
+    cli_run_train(config_cls=DemoXLLMConfig)
+```
 
 # How do I choose the methods for training?
 
@@ -586,13 +723,18 @@ deepspeed --num_gpus=8 train.py \
 
 # Special details
 
-- DeepSpeed and push_to_hub
-- DeepSpeed stage 3 and bitsandbytes
+#### DeepSpeed, LoRA and push_to_hub
+
+Currently, when using DeepSpeed, sending a checkpoint to the Hugging Face Hub also results in sending a checkpoint of the entire model in DeepSpeed format. This behavior is planned to be corrected in the future.
+
+#### DeepSpeed stage 3 and bitsandbytes
+
+Currently, it is not possible to use DeepSpeed Stage 3 and bitsandbytes together. This behavior is planned to be corrected in the future.
 
 # FAQ
 
 **Q:** How to understand that my GPU is suitable for Flash Attention 2 (`use_flash_attention_2`)?  
-**A:** Xz
+**A:** The simplest and most cost-effective way is to just try running it with this function and without it. For more details, you can refer to this source: https://github.com/Dao-AILab/flash-attention
 
 **Q:** Can I use `bitsandbytes int4`, `bitsandbytes int8` and `gptq model` at once?  
-**A:** Xz
+**A:** You can choose either `bitsandbytes int4` or `bitsandbytes int8` only. Training through the gptq model is not recommended, but it is supported. Your model must already be converted to the GPTQ format.

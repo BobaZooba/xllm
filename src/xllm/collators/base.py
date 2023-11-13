@@ -23,17 +23,22 @@ from ..utils.miscellaneous import have_missing_keys
 
 
 class BaseCollator(ABC):
-    _BATCH_MUST_HAVE_KEYS = BATCH_MUST_HAVE_KEYS
-
-    def __init__(self, tokenizer: PreTrainedTokenizer, max_length: int, separator: str = "\n"):
+    def __init__(
+        self,
+        tokenizer: PreTrainedTokenizer,
+        max_length: int,
+        separator: str = "\n",
+        batch_must_have_keys: List[str] = BATCH_MUST_HAVE_KEYS,
+    ):
         super().__init__()
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.separator = separator
+        self.batch_must_have_keys = batch_must_have_keys
 
     def __call__(self, raw_batch: List[RawSample]) -> Batch:
         batch = self.parse_batch(raw_batch=raw_batch)
-        flag, difference = have_missing_keys(data=batch, must_have_keys=self._BATCH_MUST_HAVE_KEYS)
+        flag, difference = have_missing_keys(data=batch, must_have_keys=self.batch_must_have_keys)
         if flag:
             raise ValueError(f"Batch from {self.__class__.__name__} must have {difference} keys")
         return batch

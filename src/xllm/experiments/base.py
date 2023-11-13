@@ -92,7 +92,7 @@ class Experiment:
 
     def build(self):
         dist_logger("Experiment building has started")
-        self.at_beggining()
+        self.at_beginning()
         self.save_config()
         dist_logger.info("Config saved")
 
@@ -500,7 +500,7 @@ class Experiment:
     def after_train(self) -> None:
         return None
 
-    def at_beggining(self) -> None:
+    def at_beginning(self) -> None:
         return None
 
     def at_end(self) -> None:
