@@ -50,9 +50,70 @@ the same data and models on each GPU, when you only need to do it once.
 
 Это опциональный шаг
 
-# Config
+# `Config`
 
+The `X—LLM` library uses a single config setup for all steps like preparing, training and the other steps. It's
+designed in a way that
+lets you easily understand the available features and what you can adjust. `Config` has control almost over every
+single part of each step. Thanks to the config, you can pick your dataset, set your collator, manage the type of
+quantization during training, decide if you want to use LoRA, if you need to push a checkpoint to the `HuggingFace Hub`,
+and a
+lot more.
 
+Config path: `src.xllm.core.config.Config`
+
+Or
+
+```python
+from xllm import Config
+```
+
+The most important `Config` keys are specified here: [How Config controls xllm](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
+
+You can initialize `Config` by specifying the necessary values, but also, if you are using command-line tools, you can pass values through the command line.
+
+### Init `Config`
+
+```python
+from xllm import Config
+
+config = Config(
+  model_name_or_path="mistralai/Mistral-7B-v0.1",
+  apply_lora=True,
+  stabilize=True,
+)
+
+# Do whatever you want using xllm (for example train the model)
+```
+
+### Pass values through CLI
+
+1. Write for example a train script 
+
+`train.py`
+
+  ```python
+from xllm import Config
+from xllm.cli import cli_run_train
+
+if __name__ == '__main__':
+    ...  # initializing your dataset or registering
+    cli_run_train(config_cls=Config)
+  ```
+
+2. Run the script above using CLI and provide `Config` key values
+
+  ```bash
+python train.py \
+    --model_name_or_path mistralai/Mistral-7B-v0.1 \
+    --apply_lora True \
+    --stabilize True \
+  ```
+
+### Detailed Config explanation
+
+<details>
+  <summary>Expand</summary>
 
 | Key                             | Default value             | Type           | Entity             | Comment                                                                                                                                                                                                   |
 |---------------------------------|---------------------------|----------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -141,6 +202,8 @@ the same data and models on each GPU, when you only need to do it once.
 | `wandb_api_key`                   | None                      | Optional[str]  | wandb              | Weight & Biases API key. You can also set this key using .env file                                                                                                                                        |
 | `wandb_project`                   | None                      | Optional[str]  | wandb              | Weight & Biases project name                                                                                                                                                                              |
 | `wandb_entity`                    | None                      | Optional[str]  | wandb              | Weight & Biases entity name (user or company)                                                                                                                                                             |
+
+</details>
 
 # How do I choose the methods for training?
 

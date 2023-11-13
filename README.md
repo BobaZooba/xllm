@@ -545,8 +545,8 @@ from xllm import Config
 
 ## Useful materials
 
-- [Important config fields for different steps](https://github.com/BobaZooba/xllm#fast-prototyping-)
-- [How do I choose the methods for training?](!link)
+- [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
+- [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
 - [Detailed description of all config fields](!link)
 
 # Customization options 🛠
