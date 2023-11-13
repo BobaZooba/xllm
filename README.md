@@ -16,6 +16,8 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![codecov](https://codecov.io/gh/BobaZooba/xllm/graph/badge.svg?token=ZOBMDXVW4B)](https://codecov.io/gh/BobaZooba/xllm)
 
+[![](https://dcbadge.vercel.app/api/server/n5QNPUSm)](https://discord.gg/n5QNPUSm)
+
 Easy & cutting edge LLM finetuning using the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP,
 etc)
 
