@@ -3,16 +3,16 @@
 <div align="center">
 
 [![Build](https://github.com/BobaZooba/xllm/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/BobaZooba/xllm/actions/workflows/build.yaml)
-[![Github: License](https://img.shields.io/github/license/BobaZooba/xllm.svg?color=63C462)](https://github.com/BobaZooba/xllm/blob/main/LICENSE)
-[![Github: Release](https://img.shields.io/github/v/release/BobaZooba/xllm.svg)](https://github.com/BobaZooba/xllm/releases)
+[![Github: License](https://img.shields.io/github/license/BobaZooba/xllm.svg?color=63C462&style=flat-square)](https://github.com/BobaZooba/xllm/blob/main/LICENSE)
+[![Github: Release](https://img.shields.io/github/v/release/BobaZooba/xllm.svg?color=63C462&style=flat-square)](https://github.com/BobaZooba/xllm/releases)
 
-[![PyPI - Version](https://img.shields.io/pypi/v/xllm.svg?logo=pypi&label=PyPI&logoColor=gold&color=63C462)](https://pypi.org/project/xllm/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/xllm.svg?color=63C462&label=Downloads&logo=pypi&logoColor=gold)](https://pypi.org/project/xllm/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/xllm?logo=python&label=Python&logoColor=gold&color=63C462)](https://pypi.org/project/xllm/)
+[![PyPI - Version](https://img.shields.io/pypi/v/xllm.svg?logo=pypi&label=PyPI&logoColor=gold&color=63C462&style=flat-square)](https://pypi.org/project/xllm/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/xllm.svg?color=63C462&label=Downloads&logo=pypi&logoColor=gold&style=flat-square)](https://pypi.org/project/xllm/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/xllm?logo=python&label=Python&logoColor=gold&color=63C462&style=flat-square)](https://pypi.org/project/xllm/)
 
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/modelfront/predictor/blob/master/.pre-commit-config.yaml)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=gold&color=63C462&style=flat-square)](https://github.com/modelfront/predictor/blob/master/.pre-commit-config.yaml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?logoColor=gold&color=63C462&style=flat-square)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json?logoColor=gold&color=63C462&style=flat-square)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![codecov](https://codecov.io/gh/BobaZooba/xllm/graph/badge.svg?token=ZOBMDXVW4B)](https://codecov.io/gh/BobaZooba/xllm)
 

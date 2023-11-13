@@ -14,11 +14,11 @@
 
 # ruff: noqa: F401
 
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 from . import enums, types
 from .cli.fuse import cli_run_fuse
-from .cli.prepare import cli_run_preprare
+from .cli.prepare import cli_run_prepare
 from .cli.train import cli_run_train
 from .core.config import Config
 from .run.fuse import fuse

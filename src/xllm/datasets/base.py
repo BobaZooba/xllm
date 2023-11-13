@@ -28,11 +28,10 @@ from ..utils.miscellaneous import have_missing_keys
 
 
 class BaseDataset(Dataset[RawSample], ABC):
-    _DATASET_MUST_HAVE_KEYS = DATASETS_MUST_HAVE_KEYS
-
-    def __init__(self, data: List[RawSample]):
+    def __init__(self, data: List[RawSample], must_have_keys: List[str] = DATASETS_MUST_HAVE_KEYS):
         super().__init__()
         self.data = data
+        self.must_have_keys = must_have_keys
 
     @classmethod
     def prepare(cls, config: Config) -> None:
@@ -96,7 +95,7 @@ class BaseDataset(Dataset[RawSample], ABC):
 
     def __getitem__(self, index: int) -> RawSample:
         sample = self.get_sample(index=index)
-        flag, difference = have_missing_keys(data=sample, must_have_keys=self._DATASET_MUST_HAVE_KEYS)
+        flag, difference = have_missing_keys(data=sample, must_have_keys=self.must_have_keys)
         if flag:
             raise ValueError(f"RawSample from {self.__class__.__name__} must have {difference} keys")
         return sample

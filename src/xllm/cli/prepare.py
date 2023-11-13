@@ -21,7 +21,7 @@ from ..run.prepare import prepare
 from ..utils.cli import setup_cli
 
 
-def cli_run_preprare(
+def cli_run_prepare(
     config_cls: Type[Config] = Config,
 ) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     parser = HfArgumentParser(config_cls)
@@ -32,4 +32,4 @@ def cli_run_preprare(
 
 
 if __name__ == "__main__":
-    cli_run_preprare(config_cls=Config)
+    cli_run_prepare(config_cls=Config)

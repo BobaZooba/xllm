@@ -15,6 +15,6 @@
 # ruff: noqa: F401
 
 from .fuse import cli_run_fuse
-from .prepare import cli_run_preprare
+from .prepare import cli_run_prepare
 from .quantize import cli_run_quantize
 from .train import cli_run_train

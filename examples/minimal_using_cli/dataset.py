@@ -2,11 +2,10 @@ from typing import Dict, List, Optional, Tuple
 
 import datasets
 from tqdm import tqdm
-
-from src.xllm import enums
-from src.xllm.core.config import Config
-from src.xllm.datasets.base import BaseDataset
-from src.xllm.types import RawSample
+from xllm import enums
+from xllm.core.config import Config
+from xllm.datasets.base import BaseDataset
+from xllm.types import RawSample
 
 
 class AntropicDataset(BaseDataset):
