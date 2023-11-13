@@ -1,6 +1,6 @@
-from xllm.types import RawSamplefrom typing import List
-
 # 🦖 X—LLM Documentation
+
+This is documentation of [X—LLM](https://github.com/BobaZooba/xllm) library. Easy & cutting edge LLM finetuning using the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP, etc)
 
 ## Content
 
@@ -9,10 +9,20 @@ from xllm.types import RawSamplefrom typing import List
   - [Train](#train)
     - [Data pipeline](#data-pipeline)
   - [Fuse](#fuse)
-  - [Steps](#steps)
-  - [Steps](#steps)
-- [Steps](#steps)
-- [Steps](#steps)
+  - [Quantize](#quantize)
+- [How to add CLI tools to your project](#how-to-add-cli-tools-to-your-project)
+  - [Registry](#registry)
+- [Customization](#customization)
+  - [How to implement dataset](#how-to-implement-dataset)
+  - [How to implement collator](#how-to-implement-collator)
+  - [How to implement trainer](#how-to-implement-trainer)
+  - [How to implement experiment](#how-to-implement-experiment)
+- [Config](#config)
+  - [How to extend config](#how-to-extend-config-1)
+- [How do I choose the methods for training?](#how-do-i-choose-the-methods-for-training)
+  - [Multiple GPUs training with DeepSpeed](#multiple-gpus-training-with-deepspeed)
+- [Special details](#special-details)
+- [FAQ](#faq)
 
 # Steps
 
