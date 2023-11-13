@@ -2,8 +2,17 @@ from xllm.types import RawSamplefrom typing import List
 
 # 🦖 X—LLM Documentation
 
-План
+## Content
 
+- [Steps](#steps)
+  - [Prepare](#prepare)
+  - [Train](#train)
+    - [Data pipeline](#data-pipeline)
+  - [Fuse](#fuse)
+  - [Steps](#steps)
+  - [Steps](#steps)
+- [Steps](#steps)
+- [Steps](#steps)
 
 # Steps
 
