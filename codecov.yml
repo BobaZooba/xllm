@@ -1,0 +1,26 @@
+# https://docs.codecov.io/docs/codecovyml-reference
+codecov:
+  bot: "codecov-io"
+  strict_yaml_branch: "yaml-config"
+  require_ci_to_pass: yes
+  notify:
+    after_n_builds: 1
+    wait_for_ci: yes
+  # https://docs.codecov.io/docs/codecov-yaml#section-expired-reports
+  max_report_age: off
+
+coverage:
+  precision: 1
+  round: nearest
+  range: 50...100
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 80%
+        if_ci_failed: error
+    patch:
+      default:
+        target: 95%
+        threshold: 70%
+    changes: false
