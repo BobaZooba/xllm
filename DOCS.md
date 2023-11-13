@@ -16,10 +16,6 @@
 
 ## How to implement experiment
 
-## How to extend config
-
-
-
 # Build your own project using X—LLM
 
 ## Требования к формату выхода примеров
@@ -50,7 +46,7 @@ the same data and models on each GPU, when you only need to do it once.
 
 Это опциональный шаг
 
-# `Config`
+# Config
 
 The `X—LLM` library uses a single config setup for all steps like preparing, training and the other steps. It's
 designed in a way that
@@ -204,6 +200,10 @@ python train.py \
 | `wandb_entity`                    | None                      | Optional[str]  | wandb              | Weight & Biases entity name (user or company)                                                                                                                                                             |
 
 </details>
+
+## How to extend config
+
+TODO
 
 # How do I choose the methods for training?
 

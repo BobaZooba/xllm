@@ -110,6 +110,8 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 
 ### How `Config` controls `xllm`
 
+[More about config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#config)
+
 <details>
   <summary>LoRA</summary>
 
@@ -521,9 +523,7 @@ To get a handle on building your project with `X—LLM`, check out the materials
   it
   into your own project
 - [Template project](https://github.com/BobaZooba/xllm-template): here's a template, a kickoff point you can use for
-  your projects
-- [How to implement dataset](!link)
-- [How to add CLI tools to your project](!link)
+  your project
 
 # Config 🔧
 
@@ -547,7 +547,7 @@ from xllm import Config
 
 - [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
 - [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
-- [Detailed description of all config fields](!link)
+- [Detailed description of all config fields](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#detailed-config-explanation)
 
 # Customization options 🛠
 
@@ -560,11 +560,12 @@ For some components like experiment and config, you have the option to just buil
 
 ### Useful materials
 
-- [How to implement dataset](!link)
-- [How to implement collator](!link)
-- [How to implement trainer](!link)
-- [How to implement experiment](!link)
-- [How to extend config](!link)
+- [How to implement dataset](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-dataset)
+- [How to add CLI tools to your project](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-add-cli-tools-to-your-project)
+- [How to implement collator](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-collator)
+- [How to implement trainer](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-trainer)
+- [How to implement experiment](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-experiment)
+- [How to extend config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-extend-config)
 
 # Projects using X—LLM 🏆
 
