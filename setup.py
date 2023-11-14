@@ -11,6 +11,10 @@ extras["quality"] = [
     "ruff",
 ]
 
+extras["docs"] = [
+    # "sphinx",
+]
+
 extras["tests"] = [
     "pytest",
     "coverage",
@@ -23,7 +27,7 @@ extras["build"] = [
     "twine",
 ]
 
-extras["dev"] = extras["quality"] + extras["tests"] + extras["build"]
+extras["dev"] = extras["quality"] + extras["tests"] + extras["build"] + extras["docs"]
 
 extras["deepspeed"] = ["deepspeed"]
 

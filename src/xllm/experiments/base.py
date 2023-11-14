@@ -77,15 +77,15 @@ class Experiment:
 
     Attributes:
         config (`Config`): Holds the entire configuration for the experiment, including model, dataset,
-        and training parameters.
+            and training parameters.
         training_arguments (`Optional[TrainingArguments]`): Encapsulates arguments for training,
-        such as batch size, learning rate, and saving preferences.
+            such as batch size, learning rate, and saving preferences.
         train_dataset (`Optional[BaseDataset]`): The dataset for training the model.
         eval_dataset (`Optional[BaseDataset]`): The dataset for evaluating the model.
         tokenizer (`Optional[PreTrainedTokenizer]`): Processes text data for model input.
         collator (`Optional[BaseCollator]`): Prepares batches of data for the model.
         quantization_config (`Union[BitsAndBytesConfig, GPTQConfig, None]`): Settings for model quantization
-        to reduce size and improve speed.
+            to reduce size and improve speed.
         model (`Union[PreTrainedModel, PeftModel, None]`): The actual model object that will be trained.
         lora_config (`Optional[LoraConfig]`): Configuration for LoRA.
         trainer (`Optional[LMTrainer]`): Manages and executes the training process.

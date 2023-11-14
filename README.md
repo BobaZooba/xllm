@@ -65,13 +65,13 @@ by engineers who understand your needs.
 
 X—LLM is tested on Python 3.8+, PyTorch 2.0.1+ and CUDA 11.8.
 
-```bash
+```sh
 pip install xllm
 ```
 
 Version which include `deepspeed`, `flash-attn` and `auto-gptq`:
 
-```bash
+```sh
 pip install xllm[train]
 ```
 
@@ -375,13 +375,13 @@ if __name__ == '__main__':
 
 Run train (in the `num_gpus` parameter, specify as many GPUs as you have)
 
-  ```bash
+  ```sh
   deepspeed --num_gpus=8 train.py --deepspeed_stage 2
   ```
 
 You also can pass other parameters
 
-  ```bash
+  ```sh
 deepspeed --num_gpus=8 train.py \
     --deepspeed_stage 2 \
     --apply_lora True \
@@ -419,7 +419,7 @@ will look something like this:
 
 1. Downloading and preparing data and model
 
-  ```bash
+  ```sh
 python3 MY_PROJECT/cli/prepare.py \
     --dataset_key MY_DATASET \
     --model_name_or_path mistralai/Mistral-7B-v0.1 \
@@ -428,7 +428,7 @@ python3 MY_PROJECT/cli/prepare.py \
 
 2. Run train using DeepSpeed on multiple GPUs
 
-  ```bash
+  ```sh
 deepspeed --num_gpus=8 MY_PROJECT/cli/train.py \
     --use_gradient_checkpointing True \
     --deepspeed_stage 2 \
@@ -450,7 +450,7 @@ deepspeed --num_gpus=8 MY_PROJECT/cli/train.py \
 
 3. Fuse LoRA
 
-  ```bash
+  ```sh
 python3 MY_PROJECT/cli/fuse.py \
     --model_name_or_path mistralai/Mistral-7B-v0.1 \
     --lora_hub_model_id MY_HF_HUB_NAME/LORA_MODEL_NAME \
@@ -463,7 +463,7 @@ python3 MY_PROJECT/cli/fuse.py \
 
 4. [Optional] GPTQ quantization of the trained model with fused LoRA
 
-  ```bash
+  ```sh
 python3 MY_PROJECT/cli/quantize.py \
     --model_name_or_path ./fused_model/ \
     --apply_lora False \
@@ -586,7 +586,7 @@ Write to us so that we can add your project.
 
 Consider adding a badge to your model card.
 
-```bash
+```sh
 [<img src="https://github.com/BobaZooba/xllm/blob/main/static/images/xllm-badge.png" alt="Powered by X—LLM" width="175" height="32"/>](https://github.com/BobaZooba/xllm)
 ```
 

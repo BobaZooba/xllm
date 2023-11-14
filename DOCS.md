@@ -91,7 +91,7 @@ and fused model.
 In this step, post-training quantization of the model occurs using [auto-gptq](https://github.com/PanQiWei/AutoGPTQ).
 For this, you will need to install `auto-gptq`, for example, like this:
 
-```bash
+```sh
 pip install xllm[train]
 ```
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
 More detailed examples here: [Production soluton](https://github.com/BobaZooba/xllm#production-solution-)
 
-```bash
+```sh
 python my_project/cli/prepare.py --model_name_or_path mistralai/Mistral-7B-v0.1
 python my_project/cli/train.py --model_name_or_path mistralai/Mistral-7B-v0.1
 python my_project/cli/fuse.py --model_name_or_path mistralai/Mistral-7B-v0.1
@@ -184,7 +184,7 @@ python my_project/cli/quantize.py --model_name_or_path mistralai/Mistral-7B-v0.1
 
 You also could run train via DeepSpeed (if you have multiple GPUs on your machine):
 
-```bash
+```sh
 deepspeed --num_gpus=8 my_project/cli/train.py --model_name_or_path
 ```
 
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
 #### Run
 
-```bash
+```sh
 python my_project/cli/prepare.py --dataset_key my_new_dataset
 python my_project/cli/train.py --dataset_key my_new_dataset
 ```
@@ -624,7 +624,7 @@ if __name__ == '__main__':
 
 2. Run the script above using CLI and provide `Config` key values
 
-  ```bash
+  ```sh
 python train.py \
     --model_name_or_path mistralai/Mistral-7B-v0.1 \
     --apply_lora True \
@@ -802,13 +802,13 @@ if __name__ == '__main__':
 
 Run train (in the `num_gpus` parameter, specify as many GPUs as you have)
 
-  ```bash
+  ```sh
   deepspeed --num_gpus=8 train.py --deepspeed_stage 2
   ```
 
 You also can pass other parameters
 
-  ```bash
+  ```sh
 deepspeed --num_gpus=8 train.py \
     --deepspeed_stage 2 \
     --apply_lora True \

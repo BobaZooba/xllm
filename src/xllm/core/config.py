@@ -28,6 +28,51 @@ from ..utils.logger import dist_logger
 
 @dataclass
 class Config:
+    """
+    The `Config` class serves as a comprehensive configuration schema for managing various parameters required during
+    the setup and execution of experiments relating to language models, such as training, quantization, and
+    optimization.
+
+    This dataclass is used to encapsulate and standardize the configuration for a diverse range of tasks including
+    dataset preparation, tokenizer and model initialization, training, evaluation, and interactions with remote services
+    like the Hugging Face Model Hub.
+
+    Attributes in this class cover aspects like model name and path, tokenizer settings, dataset paths, training
+    strategies, quantization methods, hardware acceleration, logging, output directories, and more. The class provides
+    properties with custom logic to resolve specific configurations and validation checks to ensure the environment is
+    appropriately set up before proceeding with the workflow.
+
+    Customization and flexibility are core to this class, as it provides reasonable defaults while also allowing for
+    detailed and scalable configurations catered to advanced tasks such as leveraging LoRA, FSDP, deepspeed stage
+    setups, and applying incremental quantization techniques like GPTQ and bits-and-bytes.
+
+    Methods within the class include:
+    - `check`: Performs checks across various attributes for compatibility and correctness.
+    - Property getters such as `correct_tokenizer_name_or_path`, `lora_target_modules`, `dtype`, `deepspeed`, `fsdp`,
+      and `lora_model_name_or_path_for_fusing` to fetch calculated or defaulted values based on attribute settings.
+
+    Subclassing can be done to extend or modify the functionality of the `Config` class to address specific experimental
+    scenarios or customized workflows. It is the central piece for orchestrating experimental setups and is intimately
+    integrated with the rest of the codebase that operates on top of these configurations.
+
+    Example of creating a `Config` object:
+        ```python
+        config = Config(
+            model_name_or_path='gpt2',
+            dataset_key='my_dataset',
+            gradient_accumulation_steps=8,
+            max_length=512,
+            deepspeed_stage=3,
+        )
+        ```
+
+    Note:
+        - Throughout the codebase, `Config` instances are passed around to provide a unified source of configurations
+          for various components.
+        - It is crucial to ensure all required settings are properly set in a `Config` object before it is utilized,
+          particularly when overriding defaults or specifying custom configurations.
+    """
+
     # general
     experiment_key: str = field(
         default=enums.Experiments.base,
@@ -36,7 +81,7 @@ class Config:
     save_safetensors: bool = field(
         default=True,
         metadata={
-            "help": "Safe serialization",
+            "help": "Use safe serialization (safe tensors) or not",
         },
     )
     max_shard_size: str = field(
@@ -627,6 +672,36 @@ class Config:
         return None
 
     def check(self) -> None:
+        """
+        Performs a series of checks to validate the configuration for compatibility with the training environment.
+
+        This method is responsible for ensuring that the environment is properly set up for the actions specified in
+        the configuration object, such as pushing to Hugging Face's hub, using deepspeed, and using flash attention.
+
+        It includes the following checks:
+        - Verifies that credentials for Hugging Face hub are provided if the model is intended to be pushed to the hub.
+        - Validates that deepspeed is installed if it is specified in the configuration.
+        - Ensures that the necessary packages are installed for using flash attention if configured to do so.
+
+        Does not return any value.
+
+        Raises:
+            - ValueError: If the configuration for hub interaction is incorrect.
+            - ImportError: If any of the required libraries (e.g., deepspeed, flash-attn, auto-gptq) are not installed.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            config = Config(...)
+            # Before proceeding with training or other operations, run checks to ensure environment compatibility.
+            config.check()
+            ```
+
+        Note:
+            - Always invoke this method after initializing a `Config` object and before proceeding with model training
+              or other operations that rely on the configuration settings.
+        """
         self.check_hub()
         self.check_deepspeed()
         self.check_flash_attention()
@@ -635,6 +710,29 @@ class Config:
 
     @property
     def correct_tokenizer_name_or_path(self) -> str:
+        """
+        Resolves the tokenizer name or path to be used for initializing the tokenizer.
+
+        This property ensures that if a specific tokenizer name or path is not provided in the configuration object,
+        the model name or path is used instead, maintaining consistency between model and tokenizer.
+
+        Returns:
+            `str`: The name or path of the tokenizer to be used. If `tokenizer_name_or_path` is specified in `Config`
+            object, that value is used. Otherwise, `model_name_or_path` is returned as the default tokenizer identifier.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            config = Config(model_name_or_path="gpt2", tokenizer_name_or_path=None)
+            tokenizer_name_or_path = config.correct_tokenizer_name_or_path
+            # tokenizer_name_or_path now holds the value "gpt2"
+            ```
+
+        Note:
+            - It is a common practice to use the same identifier for both the model and its corresponding tokenizer.
+              This property handles such a case automatically when the `tokenizer_name_or_path` is not explicitly set.
+        """
         if self.tokenizer_name_or_path is not None:
             return self.tokenizer_name_or_path
         else:
@@ -642,6 +740,35 @@ class Config:
 
     @property
     def lora_target_modules(self) -> Optional[List[str]]:
+        """
+        Interprets the LoRA target modules setting from the configuration to determine which model modules to apply
+        LoRA to.
+
+        LoRA (Low-Rank Adaptation) is a parameter-efficient training method that modifies specific layers within a
+        model. This property is responsible for parsing the `raw_lora_target_modules` configuration to identify
+        the specific modules (like attention key, query, and value matrices) that LoRA will be applied to.
+
+        Returns:
+            Optional[List[str]]: A list of module names to apply LoRA to if specified, otherwise `None` if LoRA should
+            be applied to all eligible modules as determined by the string "all" in `raw_lora_target_modules`.
+
+        Raises:
+            ValueError: If `raw_lora_target_modules` is not set.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            # Assuming a Config object with LoRA targets specified.
+            config = Config(raw_lora_target_modules="k,q,v")
+            lora_modules = config.lora_target_modules
+            # lora_modules now holds the list ['k', 'q', 'v'].
+            ```
+
+        Note:
+            - The `raw_lora_target_modules` should be provided as a comma-separated string specifying the target
+              modules. If LoRA should be applied broadly, the value "all" can be used.
+        """
         if self.raw_lora_target_modules == "all":
             return None
         elif self.raw_lora_target_modules is not None:
@@ -652,6 +779,33 @@ class Config:
 
     @property
     def dtype(self) -> torch.dtype:
+        """
+        Determines the appropriate PyTorch data type for the model based on availability of CUDA and configuration
+        settings.
+
+        This property assists in setting computational precision for training and inference (e.g., FP32, FP16, BF16),
+        basing the decision on system capabilities and user preferences as defined in the `Config` object. The selected
+        data type can impact both the computational efficiency and memory usage of the model operations.
+
+        Returns:
+            `torch.dtype`: The data type to be used for the model tensors. This can be one of the following based on the
+            system's CUDA support and configuration flags: `torch.float32` (FP32), `torch.float16` (FP16), or
+            `torch.bfloat16` (BF16).
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            config = Config(force_fp32=False, force_fp16=True)
+            model_dtype = config.dtype
+            # If CUDA is available and BF16 is supported, model_dtype will be `torch.bfloat16`.
+            # Otherwise, it falls back to `torch.float16` due to the forced FP16 configuration.
+            ```
+
+        Note:
+            - This property plays a critical role in memory management and computational efficiency, especially when
+              working with large models or limited system resources.
+        """
         if not torch.cuda.is_available() or self.force_fp32:
             return torch.float32
         elif self.force_fp16:
@@ -663,6 +817,37 @@ class Config:
 
     @property
     def deepspeed(self) -> Optional[Dict[str, Any]]:
+        """
+        Retrieves the deepspeed configuration dictionary based on settings within the `Config` object.
+
+        This property parses the deepspeed settings from the configuration to construct the configuration dictionary
+        used for ing up deepspeed in the model's training environment. It determines whether a predefined stage
+        or a custom configuration file path should be utilized.
+
+        Returns:
+            `Optional[Dict[str, Any]]`: A dictionary containing deepspeed configurations, or `None` if deepspeed is not
+            to be used.
+
+        Raises:
+            ValueError: If the `deepspeed_stage` specified does not correspond to a known configuration,
+                         or if a custom deepspeed configuration file path does not exist.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            # Assuming a predefined Config object with deepspeed specifications.
+            config = Config(deepspeed_stage=2)
+            ds_config = config.deepspeed
+            # ds_config now contains the deepspeed configuration for stage 2.
+            ```
+
+        Note:
+            - A deepspeed stage is a set of predefined configurations. If this is set, the corresponding configuration
+              will be used and any custom deepspeed configuration file will be ignored.
+            - If a custom deepspeed configuration file path is given and it exists, that configuration will be loaded
+              and used.
+        """
         if self.deepspeed_stage in [0, "0", "stage_0"]:
             return None
 
@@ -686,6 +871,37 @@ class Config:
 
     @property
     def fsdp(self) -> Union[str, List[str]]:
+        """
+        Compiles the configurations for Fully Sharded Data Parallel (FSDP) based on the settings in the `Config` object.
+
+        This property creates a list containing FSDP-related options, which informs the training process whether to
+        enable FSDP and which FSDP strategy to employ.
+
+        A list of options (fsdp_strategy) along the following:
+            "full_shard": Shard parameters, gradients and optimizer states.
+            "shard_grad_op": Shard optimizer states and gradients.
+            "offload": Offload parameters and gradients to CPUs (only compatible with "full_shard" and "shard_grad_op").
+            "auto_wrap": Automatically recursively wrap layers with FSDP using default_auto_wrap_policy.
+
+        Returns:
+            `Union[str, List[str]]`: A list of FSDP options as strings. It can be an empty string if FSDP is not used or
+            a list with the specified FSDP strategy and options such as offloading.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            # Assuming a predefined Config object with FSDP specifications.
+            config = Config(fsdp_strategy="full_shard", fsdp_offload=True)
+            fsdp_options = config.fsdp
+            ```
+
+        Note:
+            - FSDP strategies and options improve memory efficiency during distributed training by sharding the model's
+              parameters across multiple devices.
+            - The FSDP settings in the configuration should match the target training environment and system
+              capabilities.
+        """
         fsdp_options = list()
 
         if self.fsdp_strategy is not None and self.fsdp_strategy != "":
@@ -700,6 +916,149 @@ class Config:
 
     @property
     def lora_model_name_or_path_for_fusing(self) -> str:
+        """
+        Determines the name or path of the LoRA model to be used for the fusing process.
+
+        This property resolves which model should be fused by checking whether a model ID from the Hugging Face hub or a
+        local path to a LoRA model is provided in the configuration object. It is essential for the fusing operation
+        when LoRA weights need to be integrated into the base model.
+
+        Attributes:
+
+        General Settings:
+        - `experiment_key`: An enumeration key to specify the experiment type.
+        - `save_safetensors`: A boolean value to indicate whether to use safe serialization for tensors.
+        - `max_shard_size`: The maximum shard size when pushing the model to the HuggingFace Hub.
+        - `local_rank`: Local rank for distributed training, used for logging and saving.
+        - `use_gradient_checkpointing`: If set to `True`, enables gradient checkpointing to reduce memory usage at
+            the cost of a slower backward pass.
+        - `trainer_key`: An enumeration key to select the trainer using the trainers_registry.
+        - `force_fp32`: Forces loading the model in fp32 precision, if set to `True`.
+        - `force_fp16`: Forces loading the model in fp16 precision, if set to `True`.
+        - `from_gptq`: Indicates if a GPTQ quantized model is being loaded.
+        - `huggingface_hub_token`: Token for uploading models to HuggingFace Hub.
+        - `deepspeed_stage`: Predefined DeepSpeed stage for optimization.
+        - `deepspeed_config_path`: Path to the DeepSpeed config file.
+        - `fsdp_strategy`: The strategy to be used for Fully Sharded Data Parallelism (FSDP).
+        - `fsdp_offload`: If set to `True`, offloads weights to CPU when using FSDP to save memory.
+        - `seed`: Seed for random number generators to ensure reproducibility.
+        - `stabilize`: Converts some model weights to fp32 and others to fp16/bf16 for stabilization.
+        - `path_to_env_file`: Custom path to the .env file for reading environment variables.
+
+        Data Preparation:
+        - `prepare_dataset`: Flags whether to prepare the dataset during the "prepare" stage.
+
+        LoRA Fusing:
+        - `lora_hub_model_id`: Name of the LoRA model on the hub for fusion.
+        - `lora_model_local_path`: Local path to LoRA model to be fused.
+        - `fused_model_local_path`: Local path to save the fused model.
+        - `fuse_after_training`: If `True`, will fuse the model post-training.
+
+        GPTQ Quantization:
+        - `quantization_dataset_id`: Dataset ID for GPTQ quantization.
+        - `quantization_max_samples`: Maximum number of samples to use during GPTQ quantization.
+        - `quantized_model_path`: Path to save the GPTQ quantized model.
+        - `quantized_hub_model_id`: Name of the model at the hub post-GPTQ quantization.
+        - `quantized_hub_private_repo`: If set to `True`, creates a private repository for the quantized model.
+
+        Dataset Related:
+        - `dataset_key`: Key to select the dataset from the datasets_registry.
+        - `train_local_path_to_data`: Local path to the training data file.
+        - `eval_local_path_to_data`: Local path to the evaluation data file.
+        - `shuffle`: If `True`, shuffles the training data.
+        - `max_eval_samples`: Maximum number of examples to use for evaluation.
+        - `add_eval_to_train_if_no_path`: If `True`, adds evaluation data to training if there's no separate eval path.
+
+        Tokenizer Settings:
+        - `tokenizer_name_or_path`: Name or path to the tokenizer.
+        - `tokenizer_use_fast`: If `True`, uses the fast version of the tokenizer.
+        - `tokenizer_padding_side`: Sets padding side to 'right' or 'left'.
+
+        Data Collator Settings:
+        - `collator_key`: Key to select the collator from the collators_registry.
+        - `max_length`: Maximum sequence length for the model.
+
+        Model Configuration:
+        - `model_name_or_path`: Name or path to the model to be used.
+        - `push_to_hub_bos_add_bos_token`: Adds BOS token when uploading tokenization configuration to the hub.
+        - `use_flash_attention_2`: Flags the use of flash attention 2.
+        - `trust_remote_code`: If `True`, trusts remote code from the HuggingFace Hub.
+        - `device_map`: Device map for placing model layers on specific devices.
+        - `prepare_model_for_kbit_training`: If `True`, prepares the model for k-bit training.
+
+        BitsAndBytes Integration:
+        - `load_in_8bit`: Load the model in 8-bit mode using bitsandbytes.
+        - `load_in_4bit`: Load the model in 4-bit mode using bitsandbytes.
+        - `llm_int8_threshold`: Threshold for detecting outliers in the model weights.
+        - `llm_int8_has_fp16_weight`: If `True`, the model will have fp16 weights.
+        - `bnb_4bit_use_double_quant`: If `True`, a second quantization step is used for 4-bit weights.
+        - `bnb_4bit_quant_type`: Specifies the quantization type used for 4-bit weights.
+        - `bnb_quantize_after_model_init`: Determines when the quantization should occur.
+
+        GPTQ Specific Parameters:
+        - `gptq_bits`: Number of bits for GPTQ quantization.
+        - `gptq_group_size`: Group size for GPTQ quantization.
+        - `gptq_disable_exllama`: If `True`, disables ExLlama kernels during GPTQ quantization.
+
+        LoRA Specific Parameters:
+        - `apply_lora`: If `True`, applies LoRA to the model.
+        - `lora_rank`: LoRA rank to define the size of the LoRA matrices.
+        - `lora_alpha`: Multiplication factor for the resulting LoRA matrix.
+        - `lora_dropout`: Dropout rate for LoRA.
+        - `raw_lora_target_modules`: Comma-separated string of module names to apply LoRA, or 'all' to apply broadly.
+
+        Training Arguments:
+        - `output_dir`: Path to save training outputs.
+        - `per_device_train_batch_size`: Batch size per device for training.
+        - `do_eval`: If `True`, performs evaluation.
+        - `per_device_eval_batch_size`: Batch size per device for evaluation.
+        - `gradient_accumulation_steps`: Number of steps to accumulate gradients for larger effective batch size.
+        - `eval_accumulation_steps`: Number of steps to accumulate gradients during evaluation.
+        - `eval_delay`: Delay before the first evaluation.
+        - `eval_steps`: Number of update steps between evaluations.
+        - `warmup_steps`: Number of steps for learning rate warmup.
+        - `max_steps`: Maximum number of training steps.
+        - `num_train_epochs`: Number of epochs for training.
+        - `learning_rate`: Learning rate for the optimizer.
+        - `max_grad_norm`: Gradient clipping threshold.
+        - `weight_decay`: Coefficient for weight decay regularization.
+        - `label_smoothing_factor`: Label smoothing factor.
+        - `logging_steps`: Number of steps between logging intermediate results.
+        - `save_steps`: Number of training steps between checkpoints and model upload.
+        - `save_total_limit`: Maximum number of checkpoints to keep.
+        - `optim`: Optimizer name, overwritten by DeepSpeed if used.
+        - `push_to_hub`: If `True`, model checkpoints are uploaded to HuggingFace Hub.
+        - `hub_model_id`: Name of the model on the HuggingFace Hub.
+        - `hub_private_repo`: If `True`, creates a private repository on the HuggingFace Hub.
+
+        Weights & Biases Integration:
+        - `report_to_wandb`: If `True`, logs metrics to Weights & Biases.
+        - `wandb_api_key`: API key for Weights & Biases.
+        - `wandb_project`: Project name on Weights & Biases.
+        - `wandb_entity`: Entity name (user or organization) on Weights & Biases.
+
+        Returns:
+            `str`: The Hugging Face hub model ID or the local file path to the LoRA model, depending on which is
+            specified.
+
+        Raises:
+            ValueError: If neither `lora_hub_model_id` nor `lora_model_local_path` is set, indicating that there is no
+                        model specified for fusing.
+
+        Example usage:
+            ```python
+            from xllm import Config
+
+            # Assuming a Config object with a specified LoRA model on Hugging Face Hub or locally.
+            config = Config(lora_hub_model_id="username/model-id", lora_model_local_path=None)
+            model_name_or_path = config.lora_model_name_or_path_for_fusing
+            # model_name_or_path will hold the value "username/model-id".
+            ```
+
+        Note:
+            - This property is specifically used during the model fusing step and should be configured correctly in
+              scenarios where LoRA is utilized.
+        """
         if self.lora_hub_model_id is not None:
             return self.lora_hub_model_id
         elif self.lora_model_local_path is not None:

@@ -23,6 +23,47 @@ from ..types import Batch, RawSample
 
 
 class CompletionCollator(BaseCollator):
+    """
+    `CompletionCollator` is a specialized collator class extending `BaseCollator`. It is designed to prepare
+    data specifically for text completion tasks, such as language model fine-tuning and sentence completion,
+    where a model generates text based on a given prompt.
+
+    This class takes care of tokenizing the text input, generating the necessary attention masks, and creating
+    targets for the language model, ensuring that the data is presented in a way that is consistent with the
+    expectations of the model during training.
+
+    This collator is needed for cases when we want to calculate the loss only for the last text in the list.
+    For example, these are instances of interacting with an assistant. We don't want to train the model on
+    how the user speaks. We don't need the model to be able to imitate the user, so we construct the dataset
+    in such a way that at the end of the list of texts (dialogue), there is a phrase by the assistant.
+    Essentially, we will be training the model to generate these completions by the assistant.
+
+    Key features and methods provided by `CompletionCollator`:
+
+    - `__init__`: Initializes a new `CompletionCollator` with a tokenizer, maximum sequence length, and optional
+        special markers for the distinction between text prompt and completion.
+
+    - `parse_sample`: Tokenizes individual text parts, differentiating between the prompt and completion sections,
+        and prepares the input and target tokens.
+
+    - `parse_batch`: Aggregates multiple samples into a single batch, padding the sequences to the same length and
+        generating attention masks.
+
+    Attributes:
+    - `prefix_end` (`Optional[str]`): A special marker used to identify the end of the prefix or prompt in the text.
+        If provided, the tokens following this marker are treated as the completion section for which the model
+        generates predictions during training.
+
+    - Other attributes inherited from `BaseCollator`, like `tokenizer`, `max_length`, and `separator`.
+
+    By providing a structured way to prepare batches of data specifically for completion tasks, the `CompletionCollator`
+    facilitates efficient training workflows and ensures the data adheres to the format required for
+    effective fine-tuning of language models.
+
+    The `CompletionCollator` should be employed when building training loops for models that generate completions
+    to given text inputs, as it automates much of the otherwise manual batch preparation processes.
+    """
+
     def __init__(
         self,
         tokenizer: PreTrainedTokenizer,
@@ -35,6 +76,39 @@ class CompletionCollator(BaseCollator):
         self.prefix_end = prefix_end
 
     def parse_sample(self, sample: List[str]) -> Tuple[List[int], List[int]]:
+        """
+        Tokenizes a single text sample and prepares individual input and target sequences for text completion tasks.
+
+        This method takes a list of text parts, representing the segments of a single raw text sample,
+        and processes them to generate sequences of token IDs suitable for model training. It identifies
+        a prefix within the text (if specified) and ensures that targets are generated only for the completion section.
+
+        Args:
+            sample (`List[str]`):
+                A list of strings where each element is a part of the text to be tokenized. The last text part
+                is considered the completion target when a `prefix_end` is provided.
+
+        Returns:
+            `Tuple[List[int], List[int]]`: A tuple containing two lists:
+                - The first list represents the `input_ids`, token IDs for the model's input sequence.
+                - The second list represents the `targets`, corresponding token IDs for labels used during
+                    loss computation.
+
+        The `parse_sample` method performs the following steps for the given text sample:
+
+        - Appends a separator to each text part and tokenizes them, generating a list of token indices.
+        - Constructs a mask to identify the target tokens within the completion section of the text.
+        - Aligns the token indices and the mask to create `input_ids` and `targets`. Padding tokens are used
+            for non-target positions in the `targets` list.
+
+        The separation between the prefix and completion sections is defined by `self.prefix_end`.
+        When this marker is present in the last text part, it distinguishes the section of the text where model
+        predictions should align with the provided text (targets for the model).
+
+        This method is an integral part of the `CompletionCollator` class, enabling fine-grained control over
+        the tokenization and preparation of each text sample prior to batch collation.
+        """
+
         text_parts = [text + self.separator for text in sample]
         tokenized = self.tokenizer(text_parts)[enums.Transformers.input_ids]
 
@@ -71,6 +145,42 @@ class CompletionCollator(BaseCollator):
         return input_ids, targets
 
     def parse_batch(self, raw_batch: List[RawSample]) -> Batch:
+        """
+        Processes a batch of raw samples and converts them into the format expected by language models
+        for completion tasks.
+
+        This method is an implementation of the `parse_batch` abstract method from `BaseCollator`.
+        It is responsible for tokenizing the text parts within each raw sample, preparing the tokens
+        as model inputs (`input_ids`), and generating corresponding targets.
+
+        Args:
+            raw_batch (`List[RawSample]`):
+                A list of dictionaries, each representing a raw text sample. Each sample is expected to contain
+                a key-value pair, where the key is specified by `enums.General.text_parts` and the value is a list
+                of text parts to be tokenized and processed.
+
+        Returns:
+            `Batch`: A dictionary that contains three keys (`input_ids`, `attention_mask`, `labels`) with their
+            respective tensors, ready for use as input to a language model.
+                - `input_ids` and `attention_mask` are used by the model to compute the outputs.
+                - `labels` are used to calculate the loss during training.
+
+        The `parse_batch` method performs several steps for each raw sample in the batch:
+
+        - Splits the sample into text parts and tokenizes them.
+        - Determines the prefix length to differentiate between prefix and completion parts according
+            to `self.prefix_end`.
+        - Constructs the `input_ids` and `labels` by including tokens from the text and assigning padding
+            token IDs where necessary.
+        - Generates the `attention_mask` to inform the model which tokens to pay attention to during training.
+        - Pads the sequences in the batch to match the length of the longest sequence, ensuring batch
+            uniformity in size.
+
+        This collation logic is essential for text completion tasks, where models typically predict the
+        continuation of a given text prompt. By handling the tokenization and the setup of inputs and targets,
+        the `CompletionCollator` enables seamless integration with the model's expected input format.
+        """
+
         input_ids = list()
         targets = list()
         attention_masks = list()

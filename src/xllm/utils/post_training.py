@@ -29,6 +29,28 @@ TOKENIZER_CONFIG_FILE = "tokenizer_config.json"
 
 
 def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
+    """
+    Fuses a specified LoRA (Low-Rank Adaptation) model with a specified pre-trained language model and
+    returns a tokenizer-model tuple. The method alters the model's parameters to integrate LoRA layers.
+    Post integration, the method can also save the modified model according to the specified configuration,
+    either locally or by pushing to the Hugging Face model hub.
+
+    This function also includes the capability to ensure parameter data types match the desired configuration,
+    and to append a beginning-of-sentence (BOS) token and remove an end-of-sentence (EOS) token if specified.
+
+    Args:
+        config (Config):
+            The configuration object containing all necessary parameters for loading models, tokenizers,
+            setting data types, local saving, pushing to the hub, and modifying tokenizer behavior.
+
+    Returns:
+        Tuple[PreTrainedTokenizer, PreTrainedModel]: A tuple containing the tokenizer and the modified pre-trained
+            model with LoRA layers fused.
+
+    Raises:
+        ValueError: If `config.hub_model_id` is `None` when attempting to push the fused model to the Hugging Face hub.
+    """
+
     lora_model_name_or_path_for_fusing = config.lora_model_name_or_path_for_fusing
 
     tokenizer = build_tokenizer(config=config)
@@ -95,6 +117,28 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
 
 
 def push_to_hub_bos_add_bos_token(repo_id: str) -> None:
+    """
+    Modifies the tokenizer configuration to add a beginning-of-sentence (BOS) token and remove
+    the end-of-sentence (EOS) token, then uploads the updated tokenizer configuration to the
+    specified repository on the Hugging Face model hub.
+
+    This is useful for adapting tokenizers to specific requirements for models that require
+    a BOS token for correct functionality but do not need an EOS token.
+
+    Args:
+        repo_id (str):
+            The repository ID on the Hugging Face model hub where the modified tokenizer
+            configuration should be uploaded.
+
+    Raises:
+        OSError: If the downloaded tokenizer configuration file cannot be read or written.
+        HTTPError: If the upload to the Hugging Face model hub fails.
+
+    Example:
+        >>> repo_id = 'your-username/your-model-repository'
+        >>> push_to_hub_bos_add_bos_token(repo_id=repo_id)
+        >>> # Tokenizer configuration in the specified repository will now include a BOS token and exclude an EOS token.
+    """
     local_path = hf_hub_download(repo_id=repo_id, filename=TOKENIZER_CONFIG_FILE)
 
     with open(local_path) as file_object:
@@ -120,12 +164,29 @@ def push_to_hub_bos_add_bos_token(repo_id: str) -> None:
 
 
 def post_training(config: Config, tokenizer: PreTrainedTokenizer) -> None:
+    """
+    Handles post-training operations by pushing the tokenizer configuration to the Hugging Face model hub
+    if specified in the configuration. It can also modify the tokenizer configuration on the model hub to
+    add a beginning-of-sentence (BOS) token and remove an end-of-sentence (EOS) token, following a delay
+    to ensure the initial push operation has completed.
+
+    Args:
+        config (Config):
+            The configuration object that holds the settings for post-training operations, including
+            whether to push to the hub and the relevant repository details.
+
+        tokenizer (PreTrainedTokenizer):
+            The tokenizer that may be pushed to the Hugging Face model hub.
+
+    Raises:
+        ValueError: If `config.hub_model_id` is `None` but the configuration is set to push to the hub.
+    """
     if config.push_to_hub:
         if config.hub_model_id is None:
             raise ValueError("hub_model_id is None, but you want to push to HF hub")
         tokenizer.push_to_hub(repo_id=config.hub_model_id, private=config.hub_private_repo)
-        sleep(10.0)
         if config.push_to_hub_bos_add_bos_token:
+            sleep(10.0)
             push_to_hub_bos_add_bos_token(repo_id=config.hub_model_id)
 
     return None
