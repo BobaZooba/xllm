@@ -63,7 +63,7 @@ by engineers who understand your needs.
 
 ### Installation
 
-X—LLM is tested on Python 3.8+, PyTorch 2.0.1+ and CUDA 11.8.
+`X—LLM` is tested on Python 3.8+, PyTorch 2.0.1+ and CUDA 11.8.
 
 ```sh
 pip install xllm
