@@ -112,7 +112,7 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 
 ### How `Config` controls `xllm`
 
-[More about config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#config)
+[More about config](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#config)
 
 <details>
   <summary>LoRA</summary>
@@ -530,13 +530,12 @@ To get a handle on building your project with `X—LLM`, check out the materials
 
 ## Useful materials
 
-- [Docs](https://github.com/BobaZooba/xllm/blob/main/DOCS.md): here, we go into detail about everything the library can
+- [Guide](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md): here, we go into detail about everything the library can
   do
 - [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
   it
   into your own project
-- [Template project](https://github.com/BobaZooba/xllm-template): here's a template, a kickoff point you can use for
-  your project
+- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annually
 - [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
 
 # Config 🔧
@@ -560,8 +559,8 @@ from xllm import Config
 ## Useful materials
 
 - [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
-- [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
-- [Detailed description of all config fields](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#detailed-config-explanation)
+- [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-do-i-choose-the-methods-for-training)
+- [Detailed description of all config fields](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#detailed-config-explanation)
 
 # Customization options 🛠
 
@@ -574,12 +573,12 @@ For some components like experiment and config, you have the option to just buil
 
 ### Useful materials
 
-- [How to implement dataset](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-dataset)
-- [How to add CLI tools to your project](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-add-cli-tools-to-your-project)
-- [How to implement collator](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-collator)
-- [How to implement trainer](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-trainer)
-- [How to implement experiment](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-implement-experiment)
-- [How to extend config](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-to-extend-config)
+- [How to implement dataset](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-implement-dataset)
+- [How to add CLI tools to your project](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-add-cli-tools-to-your-project)
+- [How to implement collator](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-implement-collator)
+- [How to implement trainer](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-implement-trainer)
+- [How to implement experiment](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-implement-experiment)
+- [How to extend config](https://github.com/BobaZooba/xllm/blob/main/GUIDE.md#how-to-extend-config)
 
 # Projects using X—LLM 🏆
 

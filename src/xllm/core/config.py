@@ -33,6 +33,10 @@ class Config:
     the setup and execution of experiments relating to language models, such as training, quantization, and
     optimization.
 
+    Write more here:
+        - https://github.com/BobaZooba/xllm/blob/main/DOCS.md#config
+        - https://github.com/BobaZooba/xllm/blob/main/DOCS.md#detailed-config-explanation
+
     This dataclass is used to encapsulate and standardize the configuration for a diverse range of tasks including
     dataset preparation, tokenizer and model initialization, training, evaluation, and interactions with remote services
     like the Hugging Face Model Hub.

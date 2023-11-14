@@ -111,8 +111,9 @@ Also, please check:
 - [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
   it
   into your own project
-- [Template project](https://github.com/BobaZooba/xllm-template): here's a template, a kickoff point you can use for
-  your project
+- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annuall
+- [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
+
 
 ### Project structure
 
