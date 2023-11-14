@@ -57,7 +57,7 @@ install_requires = [
 # Setup
 setup(
     name="xllm",
-    version="0.0.8",
+    version="0.0.9",
     description="Simple & Cutting Edge LLM Finetuning",
     license_files=["LICENSE"],
     long_description=open("README.md", "r", encoding="utf-8").read(),
@@ -89,7 +89,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Education",
-        "Environment :: GPU :m: NVIDIA CUDA :: 11.8",
+        "Environment :: GPU :: NVIDIA CUDA :: 11.8",
         "Framework :: Jupyter",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules",
