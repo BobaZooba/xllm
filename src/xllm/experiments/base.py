@@ -49,6 +49,51 @@ from ..utils.post_training import post_training, push_to_hub_bos_add_bos_token
 
 
 class Experiment:
+    """
+    The Experiment class orchestrates the setup, execution, and management of the training process for LLM's.
+    It encapsulates the creation of datasets, models, tokenizers, collators, and trainers, alongside handling their
+    respective configurations and ensuring compatibility across components. The class provides an integrated environment
+    to apply model quantization, Low-Rank Adaptation (LoRA), perform training, evaluation, fusing LoRA
+    and pushing the results to the Hugging Face Hub.
+
+    The class provides methods for various stages of the experiment lifecycle:
+
+    - `__init__`: Initializes the experiment with user-provided or default components and configurations.
+    - `build`: Constructs all necessary components, setting up the environment for the training process.
+    - `run`: Executes the training according to the configuration and prebuilt components, handles post-training
+    activities, and optionally fuses LoRA parameters.
+    - `push_to_hub`: Uploads the model and tokenizer to the Hugging Face Hub for sharing and deployment.
+    - `fuse_lora`: Integrates LoRA parameters for streamlined model deployment if LoRA is applied during training.
+
+    Throughout the experiment life cycle, several hooks (`before_*` and `after_*` methods) are provided for users
+    to inject custom logic or steps into the process at defined points.
+
+    The Experiment class is designed to be flexible and extensible, allowing users to customize the experiment
+    by providing their implementations of datasets, models, collators, and trainers or relying on the defaults
+    determined by the given configuration parameters.
+
+    By handling the intricate setup and ensuring all components work harmoniously, the Experiment class provides
+    a structured approach to training language models, thereby simplifying the process for users.
+
+    Attributes:
+        config (`Config`): Holds the entire configuration for the experiment, including model, dataset,
+        and training parameters.
+        training_arguments (`Optional[TrainingArguments]`): Encapsulates arguments for training,
+        such as batch size, learning rate, and saving preferences.
+        train_dataset (`Optional[BaseDataset]`): The dataset for training the model.
+        eval_dataset (`Optional[BaseDataset]`): The dataset for evaluating the model.
+        tokenizer (`Optional[PreTrainedTokenizer]`): Processes text data for model input.
+        collator (`Optional[BaseCollator]`): Prepares batches of data for the model.
+        quantization_config (`Union[BitsAndBytesConfig, GPTQConfig, None]`): Settings for model quantization
+        to reduce size and improve speed.
+        model (`Union[PreTrainedModel, PeftModel, None]`): The actual model object that will be trained.
+        lora_config (`Optional[LoraConfig]`): Configuration for LoRA.
+        trainer (`Optional[LMTrainer]`): Manages and executes the training process.
+
+    The class requires at least a configuration object to be passed during initialization, while other components
+    can be optionally specified and will otherwise be built based on the provided configuration.
+    """
+
     def __init__(
         self,
         config: Config,
@@ -62,6 +107,42 @@ class Experiment:
         lora_config: Optional[LoraConfig] = None,
         trainer: Optional[LMTrainer] = None,
     ):
+        """
+        Initializes an experiment environment to set up and execute the training process of language models.
+
+        Args:
+            config (`Config`):
+                A configuration object containing all necessary parameters for the experiment such as model details,
+                dataset paths, training hyperparameters, etc.
+            training_arguments (`Optional[TrainingArguments]`, defaults to `None`):
+                Arguments relevant to the training process such as batch size, learning rate, number of epochs,
+                and the device to be used for training. If `None`, it will be built based on `config`.
+            train_dataset (`Optional[BaseDataset]`, defaults to `None`):
+                The dataset to be used for training the model. If `None`, it will be constructed from the details
+                present in `config`.
+            eval_dataset (`Optional[BaseDataset]`, defaults to `None`):
+                The dataset to be used for evaluating the model. It's built only if required and `None` is provided.
+            tokenizer (`Optional[PreTrainedTokenizer]`, defaults to `None`):
+                The tokenizer instance for text preprocessing. If `None`, it will be built based on `config`.
+            collator (`Optional[BaseCollator]`, defaults to `None`):
+                A collator instance that prepares data batches for input into the model. If `None`, it will be built
+                based on `config`.
+            quantization_config (`Union[BitsAndBytesConfig, GPTQConfig, None]`, defaults to `None`):
+                Configuration object for model quantization, which can help reduce model size and improve
+                inference speed. If not provided, and quantization is desired, it will be built based on `config`.
+            model (`Union[PreTrainedModel, PeftModel, None]`, defaults to `None`):
+                The model that will undergo training. If `None`, it will be built using the provided `config`.
+            lora_config (`Optional[LoraConfig]`, defaults to `None`):
+                Configuration for applying Low-Rank Adaptation (LoRA) to enhance the model's capabilities with
+                minimal parameter increase. If LoRA is desired and `lora_config` is `None`, it will be constructed.
+            trainer (`Optional[LMTrainer]`, defaults to `None`):
+                The trainer instance responsible for managing the model's training process. If `None`, it will
+                be built considering the other provided components and the `config`.
+
+        The constructor method sets up the `Experiment` with the necessary components for training, creating
+        default instances for any component not provided. It also includes checks to ensure provided components
+        are compatible and satisfies internal conditions for training to proceed.
+        """
         self.config = config
 
         self.training_arguments = training_arguments
@@ -91,6 +172,52 @@ class Experiment:
             )
 
     def build(self):
+        """
+        Constructs the various components required for running the experiment, including datasets, tokenizer, collator,
+        model, and trainer.
+
+        This method handles the sequential construction and initialization of components, ensuring that each is
+        configured correctly and ready for the training process. If any components have not been externally provided
+        during initialization, they will be built using the configuration parameters from the `Config` object.
+
+        Following the build sequence, if any component is not initialized, the method builds them as follows:
+
+        - It checks for the presence of a `TrainingArguments` instance and builds it if necessary, setting training
+        parameters such as directories, logging, and device usage.
+
+        - If a training dataset is not provided, the method builds it using the training data location specified in
+        the configuration object.
+
+        - An evaluation dataset is built similarly if evaluation is required and no dataset was provided.
+
+        - A tokenizer is built to process the text data for training and evaluation if not already supplied.
+
+        - The data collator, which prepares model inputs, is built if absent.
+
+        - The model quantization configuration is built if quantization is desired and no configuration was supplied.
+
+        - The actual model to be trained is built using the model details from the configuration object if not already
+        provided.
+
+        - If quantization is requested through `BitsAndBytesConfig` and deferred until after model initialization, it
+        is applied now.
+
+        - If Low-Rank Adaptation (LoRA) is configured to be applied, the corresponding adjustments are made
+        to the model.
+
+        - If the model requires stabilization before training, it is stabilized.
+
+        - Finally, the trainer is built, which encapsulates the training logic and handles the execution of
+        the training process.
+
+        Each step includes pre- and post-construction hooks that allow for custom operations before and after
+        building each component. Additionally, the method includes checks to validate the correct assembly and setup
+        of the entire experiment before proceeding with the training.
+
+        After the build process completes, an internal consistency check is performed to ensure that all components
+        are compatible and the experiment is ready to run.
+        """
+
         dist_logger("Experiment building has started")
         self.at_beginning()
         self.save_config()
@@ -413,6 +540,43 @@ class Experiment:
         return None
 
     def run(self):
+        """
+        Executes the training process for the experiment. Before calling this method, the build method must be called
+
+        Before beginning, this method runs a series of internal checks to validate that the experiment is set up
+        correctly and all necessary components are in place. This includes verifying that the trainer and
+        training arguments are not `None` and checking if evaluation is requested, ensuring that the evaluation dataset
+        is available.
+
+        The method then performs the following steps:
+
+        - Calls the `before_train` method, which serves as a hook for any pre-training procedures or custom actions
+        to be performed just before training starts.
+
+        - Starts the training process by calling the `train` method on the trainer object.
+
+        - Logs the completion of training and proceeds to any post-training steps.
+
+        - If the `fuse_after_training` flag is set in the configuration, LoRA layers, if used, are integrated into
+        the main model parameters.
+
+        - Handles the post-training tasks such as model saving and optionally pushing the trained model
+        to the Hugging Face Hub.
+
+        - Calls the `after_train` method, a hook for post-training actions that need to be executed after
+        the entire training process has completed.
+
+        - Lastly, it performs any actions required at the end of the experiment via the `at_end` method.
+
+        If the process was successful, the model will have updated weights that reflect the training it underwent,
+        and all artifacts such as logs, model checkpoints, and final model files will be saved at their respective
+        locations as defined in the training arguments.
+
+        Note: This method assumes that all the necessary components are already built and the experiment is ready
+        to run. If this is not the case, an appropriate `ValueError` will be raised indicating which required component
+        is missing.
+        """
+
         self.before_train()
 
         if self.trainer is None:
@@ -448,6 +612,41 @@ class Experiment:
         safe_serialization: Optional[bool] = None,
         need_push_to_hub_bos_add_bos_token: Optional[bool] = None,
     ) -> None:
+        """
+        Pushes the trained model and its tokenizer to the Hugging Face Hub.
+
+        This method helps you to upload the final trained model and its tokenizer directly to the Hugging Face
+        Hub, making it easily accessible for sharing and deploying.
+
+        Args:
+            repo_id (`Optional[str]`, defaults to `None`):
+                The repository name for the model on the Hugging Face Hub. If `None`, it defaults to using the
+                `hub_model_id` from the configuration.
+            private (`Optional[bool]`, defaults to `None`):
+                A boolean flag to set the repository as private or public. If `None`, it uses the `hub_private_repo`
+                setting from the configuration.
+            safe_serialization (`Optional[bool]`, defaults to `None`):
+                A boolean flag to enable safe serialization of model weights. If `None`, it uses the `save_safetensors`
+                setting from the configuration.
+            need_push_to_hub_bos_add_bos_token (`Optional[bool]`, defaults to `None`):
+                A boolean flag to indicate if there is a need to handle the special case for BOS tokens when the model
+                uses `bos_token`. If `None`, it uses the `push_to_hub_bos_add_bos_token` setting from the configuration.
+
+        This method checks for proper initialization of the repository ID (`repo_id`) and raises a `ValueError` if it's
+        not provided and not specified in the configuration. It then proceeds to push the tokenizer and model
+        to the Hugging Face Hub using the provided parameters or defaults from the configuration.
+
+        The model is uploaded with the specified serialization method to ensure compatibility and potential sharding
+        for very large models (`max_shard_size` setting from the configuration). The tokenizer is also uploaded,
+        and if needed, an additional procedure is invoked to handle special cases for BOS tokens.
+
+        Note: If the method encounters a `None` value for the tokenizer when it attempts to push it to the hub,
+        a warning is logged, and no action is taken for the tokenizer.
+
+        By the end of this method, the artifacts (model and tokenizer) are available on the Hugging Face Hub at the
+        specified repository, accessible according to the privacy settings.
+        """
+
         repo_id = repo_id or self.config.hub_model_id
 
         private = private if private is not None else self.config.hub_private_repo
@@ -480,6 +679,34 @@ class Experiment:
             )
 
     def fuse_lora(self) -> PreTrainedModel:
+        """
+        Integrates Low-Rank Adaptation (LoRA) parameters into the main model parameters, effectively 'fusing' them.
+
+        This method is called after training if the `fuse_after_training` flag is set in the configuration.
+        Fusing LoRA parameters is a process of merging LoRA's low-rank matrices into the main model's
+        weight matrices, which reduces the number of parameters and can potentially streamline deployment for inference.
+
+        The method performs the following steps:
+
+        - Checks whether LoRA was applied during the setup of the experiment. If LoRA was not used or the
+        `apply_lora` flag in the configuration is set to `False`, a warning is logged, and no fusing is performed.
+
+        - If the model is an instance of `PeftModel` (a model class that supports parameter-efficient
+        fine-tuning techniques like LoRA), it proceeds to merge LoRA parameters with the main model parameter
+        matrices. If the model is not of type `PeftModel`, a `TypeError` is raised.
+
+        - Logs the completion of the LoRA fusion process.
+
+        - Executes any custom operations or cleanup needed after the fusion process through the `after_fuse` method,
+        which serves as a hook.
+
+        Upon successful completion of this method, the model's parameters will be updated to reflect the incorporation
+        of LoRA adjustments, and the model will be ready for further actions such as evaluation, saving, or deployment.
+
+        Returns:
+            `PreTrainedModel`: The updated model with LoRA parameters fused into the main model weights.
+        """
+
         if not self.config.apply_lora:
             dist_logger.warning("Apply LoRA set to False at config")
 

@@ -1,4 +1,4 @@
-# 🦖 X—LLM: Simple & Cutting Edge LLM Finetuning
+# 🦖 X—LLM: Cutting Edge & Easy LLM Finetuning
 
 <div align="center">
 
@@ -18,7 +18,7 @@
 
 [![](https://dcbadge.vercel.app/api/server/n5QNPUSm)](https://discord.gg/n5QNPUSm)
 
-Easy & cutting edge LLM finetuning using the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP,
+Cutting Edge & Easy LLM Finetuning using the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP,
 etc)
 
 Developed

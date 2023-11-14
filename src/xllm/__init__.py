@@ -14,7 +14,7 @@
 
 # ruff: noqa: F401
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 
 from . import enums, types
 from .cli.fuse import cli_run_fuse

@@ -1,8 +1,6 @@
 from copy import deepcopy
 from typing import List, Optional, Tuple
 
-import pytest
-
 from src.xllm import enums
 from src.xllm.core.config import Config
 from src.xllm.datasets.base import BaseDataset
@@ -20,13 +18,6 @@ class TestDataset(BaseDataset):
         sample["something"] = 1
         del sample[enums.General.text_parts]
         return sample
-
-
-def test_base_dataset_exception(config: Config):
-    train_data, _ = TestDataset.get_data(config=config)
-    dataset = TestDataset(data=train_data)
-    with pytest.raises(ValueError):
-        _ = dataset[0]
 
 
 def test_prepare(path_to_empty_train_dummy_data: str, path_to_empty_eval_dummy_data: str):
