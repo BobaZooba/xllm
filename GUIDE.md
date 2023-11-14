@@ -305,7 +305,7 @@ from xllm.datasets import BaseDataset
 
 In each new dataset, we must implement two methods:
 
-- get_data
+- get_data (classmethod)
 - get_sample
 
 Let's start implementing new dataset
@@ -320,6 +320,7 @@ from xllm.types import RawSample
 
 class MyDataset(BaseDataset):
 
+    @classmethod
     def get_data(cls, config: Config) -> Optional[Tuple[List[RawSample], Optional[List[RawSample]]]]:
         ...
 
@@ -331,6 +332,8 @@ class MyDataset(BaseDataset):
 
 The input values of this method are cls from `MyDataset` and `Config`. By default, the default config from `xllm` is
 used: `from xllm import Config`
+
+It's a `classmethod`, so you can use it without creating an instance of the class.
 
 The `get_data` method should return a tuple of two elements: **training data** and **eval data**. These data should be
 lists of type `RawSample`. `RawSample`, in turn, is simply an alias for the following
@@ -838,3 +841,13 @@ details, you can refer to this source: https://github.com/Dao-AILab/flash-attent
 **Q:** Can I use `bitsandbytes int4`, `bitsandbytes int8` and `gptq model` at once?  
 **A:** You can choose either `bitsandbytes int4` or `bitsandbytes int8` only. Training through the gptq model is not
 recommended, but it is supported. Your model must already be converted to the GPTQ format.
+
+## Tale Quest
+
+`Tale Quest` is my personal project which was built using `xllm` and `Shurale`. It's an interactive text-based game
+in `Telegram` with dynamic AI characters, offering infinite scenarios
+
+You will get into exciting journeys and complete fascinating quests. Chat
+with `George Orwell`, `Tech Entrepreneur`, `Young Wizard`, `Noir Detective`, `Femme Fatale` and many more
+
+Try it now: [https://t.me/talequestbot](https://t.me/TaleQuestBot?start=Z2g)
