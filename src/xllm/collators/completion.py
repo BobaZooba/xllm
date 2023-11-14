@@ -43,7 +43,8 @@ class CompletionCollator(BaseCollator):
     - `__init__`: Initializes a new `CompletionCollator` with a tokenizer, maximum sequence length, and optional
         special markers for the distinction between text prompt and completion.
 
-    - `parse_sample`: Tokenizes individual text parts, differentiating between the prompt and completion sections,
+    - `parse_sample`:
+        Tokenizes individual text parts, differentiating between the prompt and completion sections,
         and prepares the input and target tokens.
 
     - `parse_batch`: Aggregates multiple samples into a single batch, padding the sequences to the same length and

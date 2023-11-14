@@ -123,7 +123,7 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
   config = Config(
     model_name_or_path="openchat/openchat_3.5",
     apply_lora=True,
-  )
+)
   ```
 
 #### Advanced
@@ -137,7 +137,7 @@ experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
     lora_dropout=0.05,
     raw_lora_target_modules="all",
     # Names of modules to apply LoRA. A comma-separated string, for example: "k,q,v" or "all".
-  )
+)
   ```
 
 </details>
@@ -155,7 +155,7 @@ To train the `QLoRA` model, we need to load the backbone model using `bitsandbyt
     apply_lora=True,
     load_in_4bit=True,
     prepare_model_for_kbit_training=True,
-  )
+)
   ```
 
 #### Advanced
@@ -170,7 +170,7 @@ To train the `QLoRA` model, we need to load the backbone model using `bitsandbyt
     llm_int8_has_fp16_weight=True,
     bnb_4bit_use_double_quant=True,
     bnb_4bit_quant_type="nf4",
-  )
+)
   ```
 
 </details>
@@ -185,7 +185,7 @@ with LoRA and GPUs that support `bfloat16`.
   config = Config(
     model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
     stabilize=True,
-  )
+)
   ```
 
 </details>
@@ -202,7 +202,7 @@ Before that, you must log in to `Huggingface Hub` or add an `API Token` to the e
     hub_private_repo=True,
     hub_model_id="BobaZooba/AntModel-7B-XLLM-Demo-LoRA",
     save_steps=25,
-  )
+)
   ```
 
 - Checkpoints will be saved locally and in Huggingface Hub each `save_steps`
@@ -221,7 +221,7 @@ Before that, you must log in to `W&B` or add an `API Token` to the environment v
     report_to_wandb=True,
     wandb_project="xllm-demo",
     wandb_entity="bobazooba",
-  )
+)
   ```
 
 </details>
@@ -238,7 +238,7 @@ You will be training larger models (for example 7B in colab), but at the expense
   config = Config(
     model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
     use_gradient_checkpointing=True,
-  )
+)
   ```
 
 </details>
@@ -255,7 +255,7 @@ install `flash-attn` for this. This can be done using:
   config = Config(
     model_name_or_path="meta-llama/Llama-2-7b-hf",
     use_flash_attention_2=True,
-  )
+)
   ```
 
 </details>
@@ -264,13 +264,24 @@ install `flash-attn` for this. This can be done using:
   <summary><b>Recommended setup</b></summary>
 
 #### Recommendations
+
 - It is recommended to use at least the ``stabilize`` feature and `use_flash_attention_2` (if your GPU allows it).
-- Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs and, moreover, helps very effectively combat catastrophic forgetting.
-- Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces memory consumption.
-- Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but at the expense of slowing down training.
-- If your project allows, I suggest enabling `push_to_hub` and `hub_private_repo`, also specifying the model name in `hub_model_id` and `save_steps`. Example: "BobaZooba/SupaDupaLlama-7B-LoRA". During training, every checkpoint of your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be saved, which you can later easily fuse with the main model, for example, using `xllm`.
-- I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B) and `wandb_entity` (user or organization name in W&B).
-- Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the token (`HUGGING_FACE_HUB_TOKEN`) in the .env file. Similarly, when using `report_to_wandb`, you will need to log in to W&B. You can either specify the token (`WANDB_API_KEY`) in the .env file or you will be prompted to enter the token on the command line.
+- Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
+  and, moreover, helps very effectively combat catastrophic forgetting.
+- Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
+  memory consumption.
+- Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but
+  at the expense of slowing down training.
+- If your project allows, I suggest enabling `push_to_hub` and `hub_private_repo`, also specifying the model name
+  in `hub_model_id` and `save_steps`. Example: "BobaZooba/SupaDupaLlama-7B-LoRA". During training, every checkpoint of
+  your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be
+  saved, which you can later easily fuse with the main model, for example, using `xllm`.
+- I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B)
+  and `wandb_entity` (user or organization name in W&B).
+- Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the
+  token (`HUGGING_FACE_HUB_TOKEN`) in the .env file. Similarly, when using `report_to_wandb`, you will need to log in to
+  W&B. You can either specify the token (`WANDB_API_KEY`) in the .env file or you will be prompted to enter the token on
+  the command line.
 
 #### Features
 
@@ -328,7 +339,7 @@ You can explicitly specify to fuse the model after training.
     model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
     apply_lora=True,
     fuse_after_training=True,
-  )
+)
   ```
 
 Even when you are using QLoRa
@@ -340,7 +351,7 @@ Even when you are using QLoRa
     load_in_4bit=True,
     prepare_model_for_kbit_training=True,
     fuse_after_training=True,
-  )
+)
   ```
 
 Or you can fuse the model yourself after training.
@@ -600,7 +611,6 @@ well as funding for machine maintenance.
 
 # Future Work 🔮
 
-- Add code docs
 - Add more testst
 - Add RunPod deploy function
 - Add [DPO](https://arxiv.org/abs/2305.18290) components

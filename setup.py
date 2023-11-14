@@ -12,7 +12,8 @@ extras["quality"] = [
 ]
 
 extras["docs"] = [
-    # "sphinx",
+    "sphinx",
+    "sphinx-rtd-theme",
 ]
 
 extras["tests"] = [
@@ -61,7 +62,7 @@ install_requires = [
 # Setup
 setup(
     name="xllm",
-    version="0.0.9",
+    version="0.0.10",
     description="Simple & Cutting Edge LLM Finetuning",
     license_files=["LICENSE"],
     long_description=open("README.md", "r", encoding="utf-8").read(),
