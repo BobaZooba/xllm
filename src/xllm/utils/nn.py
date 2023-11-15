@@ -106,7 +106,9 @@ def apply_lora(
     return model, lora_config
 
 
-def stabilize_training(model: Union[PreTrainedModel, PeftModel]) -> Union[PreTrainedModel, PeftModel]:
+def stabilize_training(
+    model: Union[PreTrainedModel, PeftModel], norm_fp32: bool = False
+) -> Union[PreTrainedModel, PeftModel]:
     """
     Stabilizes the training of a neural network by adjusting the data types of the model's parameters.
     Specifically, it sets the LoRA (Low-Rank Adaptation) layers to bfloat16 precision and the normalization layers
@@ -115,9 +117,11 @@ def stabilize_training(model: Union[PreTrainedModel, PeftModel]) -> Union[PreTra
     if bfloat16 is supported. If not, the model's parameters remain unchanged.
 
     Args:
-        model (Union[PreTrainedModel, PeftModel]):
+        model (`Union[PreTrainedModel, PeftModel]`):
             The neural network model to be stabilized for training. This can be a `PreTrainedModel` or a
             `PeftModel` that includes LoRA layers among its submodules.
+        norm_fp32 (`bool`, defaults to `False`):
+            Convert norm weights to fp32 or not
 
     Returns:
         Union[PreTrainedModel, PeftModel]: The adjusted model with stabilized training settings ready for
@@ -138,7 +142,7 @@ def stabilize_training(model: Union[PreTrainedModel, PeftModel]) -> Union[PreTra
             module.lora_A.to(torch.bfloat16)
             module.lora_embedding_A.to(torch.bfloat16)
             module.lora_embedding_B.to(torch.bfloat16)
-        elif "norm" in name:
+        elif "norm" in name and norm_fp32:
             module.to(torch.float32)
         elif (
             ("lm_head" in name or "embed_tokens" in name or "wte" in name or "wpe" in name)

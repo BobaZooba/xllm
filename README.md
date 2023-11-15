@@ -22,7 +22,7 @@ Cutting Edge & Easy LLM Finetuning using the most advanced methods (QLoRA, DeepS
 etc)
 
 Developed
-by [@BobaZooba](https://t.me/BobaZooba) | [CV](https://docs.google.com/document/d/1BhFvIHQ1mpm81P-n2A-lhNac-U2wOGc6F2uS9gKvk88/edit?usp=sharing) | [LinkedIn](https://www.linkedin.com/in/boriszubarev/) | [bobazooba@gmail.com](mailto:bobazooba@gmail.com)
+by [Boris Zubarev](https://t.me/BobaZooba) | [CV](https://docs.google.com/document/d/1BhFvIHQ1mpm81P-n2A-lhNac-U2wOGc6F2uS9gKvk88/edit?usp=sharing) | [LinkedIn](https://www.linkedin.com/in/boriszubarev/) | [bobazooba@gmail.com](mailto:bobazooba@gmail.com)
 
 </div>
 
@@ -93,7 +93,6 @@ from xllm.experiments import Experiment
 # QLoRA example
 config = Config(
   model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-  stabilize=True,
   apply_lora=True,
   load_in_4bit=True,
 )
@@ -182,21 +181,6 @@ To train the `QLoRA` model, we need to load the backbone model using `bitsandbyt
 </details>
 
 <details>
-  <summary>Stabilize training</summary>
-
-This technique helps to translate some operations into `fp32` for learning stability. It is also useful to use together
-with LoRA and GPUs that support `bfloat16`.
-
-  ```python
-  config = Config(
-    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-    stabilize=True,
-)
-  ```
-
-</details>
-
-<details>
   <summary>Push checkpoints to the HuggingFace Hub</summary>
 
 Before that, you must log in to `Huggingface Hub` or add an `API Token` to the environment variables.
@@ -267,13 +251,39 @@ install `flash-attn` for this. This can be done using:
 </details>
 
 <details>
+  <summary>Stabilize training</summary>
+
+Should use together with LoRA and GPUs that support `bfloat16`.
+
+  ```python
+  config = Config(
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    apply_lora=True,
+    stabilize=True,
+)
+  ```
+
+If you want to convert `norm` weights to `fp32` for better training stability
+
+  ```python
+  config = Config(
+    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+    apply_lora=True,
+    stabilize=True,
+    norm_fp32=True,
+)
+  ```
+
+</details>
+
+<details>
   <summary><b>Recommended setup</b></summary>
 
 #### Recommendations
 
-- It is recommended to use at least the ``stabilize`` feature and `use_flash_attention_2` (if your GPU allows it).
 - Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
   and, moreover, helps very effectively combat catastrophic forgetting.
+- Use `stabilize` with LoRA and GPU which supports `bfloat16`
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
   memory consumption.
 - Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but
@@ -282,6 +292,8 @@ install `flash-attn` for this. This can be done using:
   in `hub_model_id` and `save_steps`. Example: "BobaZooba/SupaDupaLlama-7B-LoRA". During training, every checkpoint of
   your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be
   saved, which you can later easily fuse with the main model, for example, using `xllm`.
+- If your GPU allows it add `use_flash_attention_2`
+- Add `norm_fp32` (works only with `stabilize`) if you want to convert `norm` to `fp32` for better training stability
 - I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B)
   and `wandb_entity` (user or organization name in W&B).
 - Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the

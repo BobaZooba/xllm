@@ -480,7 +480,7 @@ class Experiment:
         return None
 
     def stabilize_training(self) -> None:
-        self.model = stabilize_training(model=self.model)
+        self.model = stabilize_training(model=self.model, norm_fp32=self.config.norm_fp32)
 
     def after_stabilize_training(self) -> None:
         return None

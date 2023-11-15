@@ -166,7 +166,13 @@ class Config:
     stabilize: bool = field(
         default=False,
         metadata={
-            "help": "Stabilize the model. Convert some weights to fp32, some to fp16/bf16",
+            "help": "Stabilize the model. Convert some weights (e.g. LoRA) to bf16",
+        },
+    )
+    norm_fp32: bool = field(
+        default=False,
+        metadata={
+            "help": "Convert norm to fp32",
         },
     )
     path_to_env_file: Optional[str] = field(
@@ -583,6 +589,13 @@ class Config:
             "help": "Private repository or not",
         },
     )
+    neftune_noise_alpha: Optional[float] = field(
+        default=None,
+        metadata={
+            "help": "If not None, this will activate NEFTune noise embeddings. "
+            "This can drastically improve model performance for instruction fine-tuning",
+        },
+    )
 
     # wandb
     report_to_wandb: bool = field(
@@ -946,7 +959,7 @@ class Config:
         - `fsdp_strategy`: The strategy to be used for Fully Sharded Data Parallelism (FSDP).
         - `fsdp_offload`: If set to `True`, offloads weights to CPU when using FSDP to save memory.
         - `seed`: Seed for random number generators to ensure reproducibility.
-        - `stabilize`: Converts some model weights to fp32 and others to fp16/bf16 for stabilization.
+        - `stabilize`: Converts some model weights to fp32 and others to bf16 for stabilization.
         - `path_to_env_file`: Custom path to the .env file for reading environment variables.
 
         Data Preparation:

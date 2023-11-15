@@ -42,16 +42,20 @@ At this step, the following occurs:
 - Downloading and preparing data
 - Downloading the model
 
-We've made this a separate step for several reasons, with the primary one being that if you're using distributed training across multiple GPUs (e.g., via DeepSpeed), you'd otherwise redundantly download the dataset and model on each GPU. This way, you only need to do it once, saving time and resources.
+We've made this a separate step for several reasons, with the primary one being that if you're using distributed
+training across multiple GPUs (e.g., via DeepSpeed), you'd otherwise redundantly download the dataset and model on each
+GPU. This way, you only need to do it once, saving time and resources.
 
 ### Results of this step
 
-- Preprocessed data for training and optional evaluation, stored locally on the machine at the respective paths: `train_local_path_to_data` and `eval_local_path_to_data`.
+- Preprocessed data for training and optional evaluation, stored locally on the machine at the respective
+  paths: `train_local_path_to_data` and `eval_local_path_to_data`.
 - The model is retrieved and cached locally (typical download from the Hugging Face Hub)
 
 ## Train
 
-At this step, model training takes place, which is controlled through `Config`. More information on how to optimise your config:
+At this step, model training takes place, which is controlled through `Config`. More information on how to optimise your
+config:
 
 - [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
 - [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
@@ -108,9 +112,10 @@ Also, please check:
 - [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
   it
   into your own project
-- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annuall
+- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm
+  library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between
+  $120,000 to $140,000 annuall
 - [Shurale](https://github.com/BobaZooba/shurale): project with a finetuned 7B Mistal model
-
 
 ### Project structure
 
@@ -289,7 +294,9 @@ For some components like experiment and config, you have the option to just buil
 - [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
   it
   into your own project
-- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annually
+- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm
+  library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between
+  $120,000 to $140,000 annually
 - [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
 
 ## How to implement dataset
@@ -660,7 +667,7 @@ python train.py \
 | `fsdp_strategy`                   |                           | str            | general            | FSDP strategy                                                                                                                                                                                             |
 | `fsdp_offload`                    | True                      | True           | general            | Offload weights when using FSDP                                                                                                                                                                           |
 | `seed`                            | 42                        | int            | general            | Seed value for random operations                                                                                                                                                                          |
-| `stabilize`                       | False                     | bool           | general            | Stabilize the model. Convert some weights to fp32, some to fp16/bf16                                                                                                                                      |
+| `stabilize`                       | False                     | bool           | general            | Stabilize the model. Convert some weights (e.g. LoRA) to bf16                                                                                                                                             |
 | `path_to_env_file`                | ./.env                    | Optional[str]  | general            | Custom path to .env file                                                                                                                                                                                  |
 | `prepare_dataset`                 | True                      | bool           | general            | Prepare the dataset. Works only at "prepare" stage                                                                                                                                                        |
 | `lora_hub_model_id`               | None                      | Optional[str]  | fuse               | Fusing LoRA. The name of the LoRA model at the hub for fusing. Example: BobaZooba/Shurale                                                                                                                 |
@@ -768,9 +775,9 @@ if __name__ == "__main__":
 
 # How do I choose the methods for training?
 
-- It is recommended to use at least the ``stabilize`` feature and `use_flash_attention_2` (if your GPU allows it).
 - Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
   and, moreover, helps very effectively combat catastrophic forgetting.
+- Use `stabilize` with LoRA and GPU which supports `bfloat16`
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
   memory consumption.
 - Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but
@@ -779,6 +786,8 @@ if __name__ == "__main__":
   in `hub_model_id` and `save_steps`. Example: "BobaZooba/SupaDupaLlama-7B-LoRA". During training, every checkpoint of
   your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be
   saved, which you can later easily fuse with the main model, for example, using `xllm`.
+- If your GPU allows it add `use_flash_attention_2`
+- Add `norm_fp32` (works only with `stabilize`) if you want to convert `norm` to `fp32` for better training stability
 - I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B)
   and `wandb_entity` (user or organization name in W&B).
 - Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the

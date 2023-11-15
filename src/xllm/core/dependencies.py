@@ -129,6 +129,7 @@ def build_training_arguments(config: Config) -> TrainingArguments:
         seed=config.seed,
         data_seed=config.seed,
         metric_for_best_model="eval_loss" if config.do_eval else "loss",
+        neftune_noise_alpha=config.neftune_noise_alpha,
     )
     return training_arguments
 
