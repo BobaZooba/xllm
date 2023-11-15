@@ -420,13 +420,13 @@ deepspeed --num_gpus=8 train.py \
 `X—LLM` enables not only to prototype models, but also facilitates the development of production-ready solutions through
 built-in capabilities and customization.
 
-Using `X—LLM` to train a model is simple and involves these few steps:
+Using `X—LLM` to train a model is easy and involves these few steps:
 
 1. `Prepare` — Get the data and the model ready by downloading and preparing them. Saves data locally
    to `config.train_local_path_to_data` and `config.eval_local_path_to_data` if you are using eval dataset
 2. `Train` — Use the data prepared in the previous step to train the model
 3. `Fuse` — If you used LoRA during the training, fuse LoRA
-4. `Quantize` — Make your model take less memory by quantizing it
+4. `Quantize` — Optimize your model's memory usage by quantizing it
 
 Remember, these tasks in `X—LLM` start from the command line. So, when you're all set to go, launching your full project
 will look something like this:

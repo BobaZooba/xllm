@@ -3,7 +3,7 @@
 This is documentation of [X—LLM](https://github.com/BobaZooba/xllm) library. Cutting Edge & Easy LLM Finetuning using
 the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP, etc)
 
-## Content
+## Contents
 
 - [Steps](#steps)
   - [Prepare](#prepare)
@@ -27,13 +27,13 @@ the most advanced methods (QLoRA, DeepSpeed, GPTQ, Flash Attention 2, FSDP, etc)
 
 # Steps
 
-Using `X—LLM` to train a model is simple and involves these few steps:
+Using `X—LLM` to train a model is easy and involves these few steps:
 
 1. `Prepare` — Get the data and the model ready by downloading and preparing them. Saves data locally
    to `config.train_local_path_to_data` and `config.eval_local_path_to_data` if you are using eval dataset
 2. `Train` — Use the data prepared in the previous step to train the model
 3. `Fuse` — If you used LoRA during the training, fuse LoRA
-4. `Quantize` — Make your model take less memory by quantizing it
+4. `Quantize` — Optimize your model's memory usage by quantizing it
 
 ## Prepare
 
@@ -42,20 +42,16 @@ At this step, the following occurs:
 - Downloading and preparing data
 - Downloading the model
 
-We've separated this as a distinct step for a few reasons, chief among them being: if you're utilizing distributed
-training across several GPUs - for instance via DeepSpeed - you would otherwise end up redundantly downloading the
-dataset and model on each individual GPU, even though you only need to do it once.
+We've made this a separate step for several reasons, with the primary one being that if you're using distributed training across multiple GPUs (e.g., via DeepSpeed), you'd otherwise redundantly download the dataset and model on each GPU. This way, you only need to do it once, saving time and resources.
 
 ### Results of this step
 
-- Prepared data (training and optionally eval), which are stored locally on the machine at the corresponding
-  paths: `train_local_path_to_data` и `eval_local_path_to_data`
-- A model downloaded to the local cache (typical model download from the Hugging Face Hub)
+- Preprocessed data for training and optional evaluation, stored locally on the machine at the respective paths: `train_local_path_to_data` and `eval_local_path_to_data`.
+- The model is retrieved and cached locally (typical download from the Hugging Face Hub)
 
 ## Train
 
-At this step, model training occurs, which is controlled through `Config`. More information on how to better create a
-config can be learned here:
+At this step, model training takes place, which is controlled through `Config`. More information on how to optimise your config:
 
 - [Important config fields for different steps](https://github.com/BobaZooba/xllm#how-config-controls-xllm)
 - [How do I choose the methods for training?](https://github.com/BobaZooba/xllm/blob/main/DOCS.md#how-do-i-choose-the-methods-for-training)
@@ -63,10 +59,11 @@ config can be learned here:
 
 ### Data pipeline
 
-What happens to the data? One step of training is described below
+What happens to the data? Description of one training step:
 
+- Every sample is transformed into a dictionary with designated keys in the `get_sample` method of the `Dataset`
 - Each sample is transformed into a dictionary with specified keys in the get_sample method of the Dataset
-- A batch is assembled, and the batch goes through a collator, which is responsible
+- A batch is assembled, and passed through a `collator`, which is responsible
   for `tokenization`, `label preparation`, in other words, for **preparing the input data for the model**. The collator
   knows which keys it needs to accept as input and how to process each key
 - The batch is processed by the `compute_loss` method of the `Trainer`, and this method returns the `loss`. A `backward`
@@ -89,7 +86,7 @@ and fused model.
 ## Quantize
 
 In this step, post-training quantization of the model occurs using [auto-gptq](https://github.com/PanQiWei/AutoGPTQ).
-For this, you will need to install `auto-gptq`, for example, like this:
+For this, you will need to install `auto-gptq`, e.g. like this:
 
 ```sh
 pip install xllm[train]
@@ -112,7 +109,7 @@ Also, please check:
   it
   into your own project
 - [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annuall
-- [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
+- [Shurale](https://github.com/BobaZooba/shurale): project with a finetuned 7B Mistal model
 
 
 ### Project structure
@@ -257,7 +254,7 @@ python my_project/cli/prepare.py --dataset_key my_new_dataset
 python my_project/cli/train.py --dataset_key my_new_dataset
 ```
 
-You could extend registy with different components:
+You could expand the registry with different components:
 
 `registry.py`
 
