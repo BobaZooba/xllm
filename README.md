@@ -96,10 +96,6 @@ config = Config(
   stabilize=True,
   apply_lora=True,
   load_in_4bit=True,
-  push_to_hub=True,
-  hub_private_repo=True,
-  hub_model_id="BobaZooba/SupaDupaZephyr-7B-LoRA",
-  save_steps=1_000,
 )
 
 # Prepare the data
