@@ -344,8 +344,8 @@ class Config:
             "help": "Device map for loading the model",
         },
     )
-    prepare_model_for_kbit_training: bool = field(
-        default=True,
+    prepare_model_for_kbit_training: Optional[bool] = field(
+        default=None,
         metadata={
             "help": "Prepare or not for kbit training",
         },
@@ -1069,3 +1069,10 @@ class Config:
             return self.lora_model_local_path
         else:
             raise ValueError("Please set lora_hub_model_id or lora_model_local_path for fusing")
+
+    @property
+    def need_to_prepare_model_for_kbit_training(self) -> bool:
+        if self.prepare_model_for_kbit_training is not None:
+            return self.prepare_model_for_kbit_training
+        else:
+            return self.from_gptq or self.load_in_4bit or self.load_in_8bit

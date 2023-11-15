@@ -456,7 +456,7 @@ class Experiment:
         )
         self.model.is_loaded_in_4bit = self.config.load_in_4bit
         self.model.is_loaded_in_8bit = self.config.load_in_8bit
-        if self.config.prepare_model_for_kbit_training:
+        if self.config.need_to_prepare_model_for_kbit_training:
             self.model = prepare_model_for_kbit_training(
                 model=self.model, use_gradient_checkpointing=self.config.use_gradient_checkpointing
             )

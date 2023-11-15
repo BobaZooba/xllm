@@ -453,7 +453,7 @@ def build_model(
     )
     model.config.pretraining_tp = 1
 
-    if quantization_config is not None and config.prepare_model_for_kbit_training:
+    if quantization_config is not None and config.need_to_prepare_model_for_kbit_training:
         model = prepare_model_for_kbit_training(
             model=model, use_gradient_checkpointing=config.use_gradient_checkpointing
         )

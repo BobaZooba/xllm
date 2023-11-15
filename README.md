@@ -90,7 +90,17 @@ from xllm.datasets import GeneralDataset
 from xllm.experiments import Experiment
 
 # Init Config which controls the internal logic of xllm
-config = Config(model_name_or_path="HuggingFaceH4/zephyr-7b-beta")
+# QLoRA example
+config = Config(
+  model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
+  stabilize=True,
+  apply_lora=True,
+  load_in_4bit=True,
+  push_to_hub=True,
+  hub_private_repo=True,
+  hub_model_id="BobaZooba/SupaDupaZephyr-7B-LoRA",
+  save_steps=1_000,
+)
 
 # Prepare the data
 train_data = ["Hello!"] * 100
