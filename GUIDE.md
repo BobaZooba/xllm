@@ -286,6 +286,12 @@ We've got ready-to-use components for every part of the `xllm` pipeline. You can
 like the dataset, collator, trainer, and experiment.
 For some components like experiment and config, you have the option to just build on what's already there.
 
+- [Demo project](https://github.com/BobaZooba/xllm-demo): here's a step-by-step example of how to use `X—LLM` and fit
+  it
+  into your own project
+- [WeatherGPT](https://github.com/BobaZooba/wgpt): this repository features an example of how to utilize the xllm library. Included is a solution for a common type of assessment given to LLM engineers, who typically earn between $120,000 to $140,000 annually
+- [Shurale](https://github.com/BobaZooba/shurale): project with the finetuned 7B Mistal model
+
 ## How to implement dataset
 
 Dataset is the most basic component in `xllm`. With this component we can describe the logic of how and from where the
