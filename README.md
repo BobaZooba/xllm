@@ -257,7 +257,7 @@ install `flash-attn` for this. This can be done using:
 
 #### Recommendations
 
-- Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
+- Incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
   and, moreover, helps very effectively combat catastrophic forgetting.
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
   memory consumption.
