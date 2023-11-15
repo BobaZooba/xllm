@@ -615,7 +615,6 @@ from xllm import Config
 config = Config(
     model_name_or_path="mistralai/Mistral-7B-v0.1",
     apply_lora=True,
-    stabilize=True,
 )
 
 # Do whatever you want using xllm (for example train the model)
@@ -642,7 +641,6 @@ if __name__ == '__main__':
 python train.py \
     --model_name_or_path mistralai/Mistral-7B-v0.1 \
     --apply_lora True \
-    --stabilize True \
   ```
 
 ### Detailed Config explanation
@@ -777,7 +775,6 @@ if __name__ == "__main__":
 
 - Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
   and, moreover, helps very effectively combat catastrophic forgetting.
-- Use `stabilize` with LoRA and GPU which supports `bfloat16`
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
   memory consumption.
 - Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but
@@ -787,7 +784,6 @@ if __name__ == "__main__":
   your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be
   saved, which you can later easily fuse with the main model, for example, using `xllm`.
 - If your GPU allows it add `use_flash_attention_2`
-- Add `norm_fp32` (works only with `stabilize`) if you want to convert `norm` to `fp32` for better training stability
 - I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B)
   and `wandb_entity` (user or organization name in W&B).
 - Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the
