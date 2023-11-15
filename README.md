@@ -250,30 +250,6 @@ install `flash-attn` for this. This can be done using:
 
 </details>
 
-<details>
-  <summary>Stabilize training</summary>
-
-Should use together with LoRA and GPUs that support `bfloat16`.
-
-  ```python
-  config = Config(
-    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-    apply_lora=True,
-    stabilize=True,
-)
-  ```
-
-If you want to convert `norm` weights to `fp32` for better training stability
-
-  ```python
-  config = Config(
-    model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
-    apply_lora=True,
-    stabilize=True,
-    norm_fp32=True,
-)
-  ```
-
 </details>
 
 <details>
@@ -283,7 +259,6 @@ If you want to convert `norm` weights to `fp32` for better training stability
 
 - Another incredibly effective method is LoRA (`apply_lora`). It allows for a tremendous reduction in training costs
   and, moreover, helps very effectively combat catastrophic forgetting.
-- Use `stabilize` with LoRA and GPU which supports `bfloat16`
 - Then, I advise using `load_in_4bit` and `prepare_model_for_kbit_training` together. This also significantly reduces
   memory consumption.
 - Lastly, I would recommend apply `use_gradient_checkpointing`. This method also greatly reduces memory consumption, but
@@ -293,7 +268,6 @@ If you want to convert `norm` weights to `fp32` for better training stability
   your model will be saved in the HuggingFace Hub. If you specified `apply_lora`, then only the LoRA weights will be
   saved, which you can later easily fuse with the main model, for example, using `xllm`.
 - If your GPU allows it add `use_flash_attention_2`
-- Add `norm_fp32` (works only with `stabilize`) if you want to convert `norm` to `fp32` for better training stability
 - I also recommend using `report_to_wandb`, also specifying `wandb_project` (the project name in W&B)
   and `wandb_entity` (user or organization name in W&B).
 - Note that for `push_to_hub`, you need to log in to the HuggingFace Hub beforehand or specify the
