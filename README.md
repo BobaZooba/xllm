@@ -108,10 +108,10 @@ experiment.build()
 # Run Experiment (training)
 experiment.run()
 
-# [Optional] Fuse LoRA layers
-experiment.fuse_lora()
+# # [Optional] Fuse LoRA layers
+# experiment.fuse_lora()
 
-# [Optional] Push fused model (or just LoRA weight) to the HuggingFace Hub
+# [Optional] Or push LoRA weights to HuggingFace Hub
 experiment.push_to_hub(repo_id="YOUR_NAME/MODEL_NAME")
 ```
 
