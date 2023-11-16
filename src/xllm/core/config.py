@@ -59,6 +59,120 @@ class Config:
     scenarios or customized workflows. It is the central piece for orchestrating experimental setups and is intimately
     integrated with the rest of the codebase that operates on top of these configurations.
 
+    Attributes:
+
+    General Settings:
+    - `experiment_key`: An enumeration key to specify the experiment type.
+    - `save_safetensors`: A boolean value to indicate whether to use safe serialization for tensors.
+    - `max_shard_size`: The maximum shard size when pushing the model to the HuggingFace Hub.
+    - `local_rank`: Local rank for distributed training, used for logging and saving.
+    - `use_gradient_checkpointing`: If set to `True`, enables gradient checkpointing to reduce memory usage at
+        the cost of a slower backward pass.
+    - `trainer_key`: An enumeration key to select the trainer using the trainers_registry.
+    - `force_fp32`: Forces loading the model in fp32 precision, if set to `True`.
+    - `force_fp16`: Forces loading the model in fp16 precision, if set to `True`.
+    - `from_gptq`: Indicates if a GPTQ quantized model is being loaded.
+    - `huggingface_hub_token`: Token for uploading models to HuggingFace Hub.
+    - `deepspeed_stage`: Predefined DeepSpeed stage for optimization.
+    - `deepspeed_config_path`: Path to the DeepSpeed config file.
+    - `fsdp_strategy`: The strategy to be used for Fully Sharded Data Parallelism (FSDP).
+    - `fsdp_offload`: If set to `True`, offloads weights to CPU when using FSDP to save memory.
+    - `seed`: Seed for random number generators to ensure reproducibility.
+    - `stabilize`: Converts some model weights to fp32 and others to bf16 for stabilization.
+    - `path_to_env_file`: Custom path to the .env file for reading environment variables.
+
+    Data Preparation:
+    - `prepare_dataset`: Flags whether to prepare the dataset during the "prepare" stage.
+
+    LoRA Fusing:
+    - `lora_hub_model_id`: Name of the LoRA model on the hub for fusion.
+    - `lora_model_local_path`: Local path to LoRA model to be fused.
+    - `fused_model_local_path`: Local path to save the fused model.
+    - `fuse_after_training`: If `True`, will fuse the model post-training.
+
+    GPTQ Quantization:
+    - `quantization_dataset_id`: Dataset ID for GPTQ quantization.
+    - `quantization_max_samples`: Maximum number of samples to use during GPTQ quantization.
+    - `quantized_model_path`: Path to save the GPTQ quantized model.
+    - `quantized_hub_model_id`: Name of the model at the hub post-GPTQ quantization.
+    - `quantized_hub_private_repo`: If set to `True`, creates a private repository for the quantized model.
+
+    Dataset Related:
+    - `dataset_key`: Key to select the dataset from the datasets_registry.
+    - `train_local_path_to_data`: Local path to the training data file.
+    - `eval_local_path_to_data`: Local path to the evaluation data file.
+    - `shuffle`: If `True`, shuffles the training data.
+    - `max_eval_samples`: Maximum number of examples to use for evaluation.
+    - `add_eval_to_train_if_no_path`: If `True`, adds evaluation data to training if there's no separate eval path.
+
+    Tokenizer Settings:
+    - `tokenizer_name_or_path`: Name or path to the tokenizer.
+    - `tokenizer_use_fast`: If `True`, uses the fast version of the tokenizer.
+    - `tokenizer_padding_side`: Sets padding side to 'right' or 'left'.
+
+    Data Collator Settings:
+    - `collator_key`: Key to select the collator from the collators_registry.
+    - `max_length`: Maximum sequence length for the model.
+
+    Model Configuration:
+    - `model_name_or_path`: Name or path to the model to be used.
+    - `push_to_hub_bos_add_bos_token`: Adds BOS token when uploading tokenization configuration to the hub.
+    - `use_flash_attention_2`: Flags the use of flash attention 2.
+    - `trust_remote_code`: If `True`, trusts remote code from the HuggingFace Hub.
+    - `device_map`: Device map for placing model layers on specific devices.
+    - `prepare_model_for_kbit_training`: If `True`, prepares the model for k-bit training.
+
+    BitsAndBytes Integration:
+    - `load_in_8bit`: Load the model in 8-bit mode using bitsandbytes.
+    - `load_in_4bit`: Load the model in 4-bit mode using bitsandbytes.
+    - `llm_int8_threshold`: Threshold for detecting outliers in the model weights.
+    - `llm_int8_has_fp16_weight`: If `True`, the model will have fp16 weights.
+    - `bnb_4bit_use_double_quant`: If `True`, a second quantization step is used for 4-bit weights.
+    - `bnb_4bit_quant_type`: Specifies the quantization type used for 4-bit weights.
+    - `bnb_quantize_after_model_init`: Determines when the quantization should occur.
+
+    GPTQ Specific Parameters:
+    - `gptq_bits`: Number of bits for GPTQ quantization.
+    - `gptq_group_size`: Group size for GPTQ quantization.
+    - `gptq_disable_exllama`: If `True`, disables ExLlama kernels during GPTQ quantization.
+
+    LoRA Specific Parameters:
+    - `apply_lora`: If `True`, applies LoRA to the model.
+    - `lora_rank`: LoRA rank to define the size of the LoRA matrices.
+    - `lora_alpha`: Multiplication factor for the resulting LoRA matrix.
+    - `lora_dropout`: Dropout rate for LoRA.
+    - `raw_lora_target_modules`: Comma-separated string of module names to apply LoRA, or 'all' to apply broadly.
+
+    Training Arguments:
+    - `output_dir`: Path to save training outputs.
+    - `per_device_train_batch_size`: Batch size per device for training.
+    - `do_eval`: If `True`, performs evaluation.
+    - `per_device_eval_batch_size`: Batch size per device for evaluation.
+    - `gradient_accumulation_steps`: Number of steps to accumulate gradients for larger effective batch size.
+    - `eval_accumulation_steps`: Number of steps to accumulate gradients during evaluation.
+    - `eval_delay`: Delay before the first evaluation.
+    - `eval_steps`: Number of update steps between evaluations.
+    - `warmup_steps`: Number of steps for learning rate warmup.
+    - `max_steps`: Maximum number of training steps.
+    - `num_train_epochs`: Number of epochs for training.
+    - `learning_rate`: Learning rate for the optimizer.
+    - `max_grad_norm`: Gradient clipping threshold.
+    - `weight_decay`: Coefficient for weight decay regularization.
+    - `label_smoothing_factor`: Label smoothing factor.
+    - `logging_steps`: Number of steps between logging intermediate results.
+    - `save_steps`: Number of training steps between checkpoints and model upload.
+    - `save_total_limit`: Maximum number of checkpoints to keep.
+    - `optim`: Optimizer name, overwritten by DeepSpeed if used.
+    - `push_to_hub`: If `True`, model checkpoints are uploaded to HuggingFace Hub.
+    - `hub_model_id`: Name of the model on the HuggingFace Hub.
+    - `hub_private_repo`: If `True`, creates a private repository on the HuggingFace Hub.
+
+    Weights & Biases Integration:
+    - `report_to_wandb`: If `True`, logs metrics to Weights & Biases.
+    - `wandb_api_key`: API key for Weights & Biases.
+    - `wandb_project`: Project name on Weights & Biases.
+    - `wandb_entity`: Entity name (user or organization) on Weights & Biases.
+
     Example of creating a `Config` object:
         ```python
         config = Config(
@@ -354,6 +468,12 @@ class Config:
         default=None,
         metadata={
             "help": "Prepare or not for kbit training",
+        },
+    )
+    offload_folder: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Offloading folder. Helps for fusing in colab",
         },
     )
 
@@ -939,120 +1059,6 @@ class Config:
         This property resolves which model should be fused by checking whether a model ID from the Hugging Face hub or a
         local path to a LoRA model is provided in the configuration object. It is essential for the fusing operation
         when LoRA weights need to be integrated into the base model.
-
-        Attributes:
-
-        General Settings:
-        - `experiment_key`: An enumeration key to specify the experiment type.
-        - `save_safetensors`: A boolean value to indicate whether to use safe serialization for tensors.
-        - `max_shard_size`: The maximum shard size when pushing the model to the HuggingFace Hub.
-        - `local_rank`: Local rank for distributed training, used for logging and saving.
-        - `use_gradient_checkpointing`: If set to `True`, enables gradient checkpointing to reduce memory usage at
-            the cost of a slower backward pass.
-        - `trainer_key`: An enumeration key to select the trainer using the trainers_registry.
-        - `force_fp32`: Forces loading the model in fp32 precision, if set to `True`.
-        - `force_fp16`: Forces loading the model in fp16 precision, if set to `True`.
-        - `from_gptq`: Indicates if a GPTQ quantized model is being loaded.
-        - `huggingface_hub_token`: Token for uploading models to HuggingFace Hub.
-        - `deepspeed_stage`: Predefined DeepSpeed stage for optimization.
-        - `deepspeed_config_path`: Path to the DeepSpeed config file.
-        - `fsdp_strategy`: The strategy to be used for Fully Sharded Data Parallelism (FSDP).
-        - `fsdp_offload`: If set to `True`, offloads weights to CPU when using FSDP to save memory.
-        - `seed`: Seed for random number generators to ensure reproducibility.
-        - `stabilize`: Converts some model weights to fp32 and others to bf16 for stabilization.
-        - `path_to_env_file`: Custom path to the .env file for reading environment variables.
-
-        Data Preparation:
-        - `prepare_dataset`: Flags whether to prepare the dataset during the "prepare" stage.
-
-        LoRA Fusing:
-        - `lora_hub_model_id`: Name of the LoRA model on the hub for fusion.
-        - `lora_model_local_path`: Local path to LoRA model to be fused.
-        - `fused_model_local_path`: Local path to save the fused model.
-        - `fuse_after_training`: If `True`, will fuse the model post-training.
-
-        GPTQ Quantization:
-        - `quantization_dataset_id`: Dataset ID for GPTQ quantization.
-        - `quantization_max_samples`: Maximum number of samples to use during GPTQ quantization.
-        - `quantized_model_path`: Path to save the GPTQ quantized model.
-        - `quantized_hub_model_id`: Name of the model at the hub post-GPTQ quantization.
-        - `quantized_hub_private_repo`: If set to `True`, creates a private repository for the quantized model.
-
-        Dataset Related:
-        - `dataset_key`: Key to select the dataset from the datasets_registry.
-        - `train_local_path_to_data`: Local path to the training data file.
-        - `eval_local_path_to_data`: Local path to the evaluation data file.
-        - `shuffle`: If `True`, shuffles the training data.
-        - `max_eval_samples`: Maximum number of examples to use for evaluation.
-        - `add_eval_to_train_if_no_path`: If `True`, adds evaluation data to training if there's no separate eval path.
-
-        Tokenizer Settings:
-        - `tokenizer_name_or_path`: Name or path to the tokenizer.
-        - `tokenizer_use_fast`: If `True`, uses the fast version of the tokenizer.
-        - `tokenizer_padding_side`: Sets padding side to 'right' or 'left'.
-
-        Data Collator Settings:
-        - `collator_key`: Key to select the collator from the collators_registry.
-        - `max_length`: Maximum sequence length for the model.
-
-        Model Configuration:
-        - `model_name_or_path`: Name or path to the model to be used.
-        - `push_to_hub_bos_add_bos_token`: Adds BOS token when uploading tokenization configuration to the hub.
-        - `use_flash_attention_2`: Flags the use of flash attention 2.
-        - `trust_remote_code`: If `True`, trusts remote code from the HuggingFace Hub.
-        - `device_map`: Device map for placing model layers on specific devices.
-        - `prepare_model_for_kbit_training`: If `True`, prepares the model for k-bit training.
-
-        BitsAndBytes Integration:
-        - `load_in_8bit`: Load the model in 8-bit mode using bitsandbytes.
-        - `load_in_4bit`: Load the model in 4-bit mode using bitsandbytes.
-        - `llm_int8_threshold`: Threshold for detecting outliers in the model weights.
-        - `llm_int8_has_fp16_weight`: If `True`, the model will have fp16 weights.
-        - `bnb_4bit_use_double_quant`: If `True`, a second quantization step is used for 4-bit weights.
-        - `bnb_4bit_quant_type`: Specifies the quantization type used for 4-bit weights.
-        - `bnb_quantize_after_model_init`: Determines when the quantization should occur.
-
-        GPTQ Specific Parameters:
-        - `gptq_bits`: Number of bits for GPTQ quantization.
-        - `gptq_group_size`: Group size for GPTQ quantization.
-        - `gptq_disable_exllama`: If `True`, disables ExLlama kernels during GPTQ quantization.
-
-        LoRA Specific Parameters:
-        - `apply_lora`: If `True`, applies LoRA to the model.
-        - `lora_rank`: LoRA rank to define the size of the LoRA matrices.
-        - `lora_alpha`: Multiplication factor for the resulting LoRA matrix.
-        - `lora_dropout`: Dropout rate for LoRA.
-        - `raw_lora_target_modules`: Comma-separated string of module names to apply LoRA, or 'all' to apply broadly.
-
-        Training Arguments:
-        - `output_dir`: Path to save training outputs.
-        - `per_device_train_batch_size`: Batch size per device for training.
-        - `do_eval`: If `True`, performs evaluation.
-        - `per_device_eval_batch_size`: Batch size per device for evaluation.
-        - `gradient_accumulation_steps`: Number of steps to accumulate gradients for larger effective batch size.
-        - `eval_accumulation_steps`: Number of steps to accumulate gradients during evaluation.
-        - `eval_delay`: Delay before the first evaluation.
-        - `eval_steps`: Number of update steps between evaluations.
-        - `warmup_steps`: Number of steps for learning rate warmup.
-        - `max_steps`: Maximum number of training steps.
-        - `num_train_epochs`: Number of epochs for training.
-        - `learning_rate`: Learning rate for the optimizer.
-        - `max_grad_norm`: Gradient clipping threshold.
-        - `weight_decay`: Coefficient for weight decay regularization.
-        - `label_smoothing_factor`: Label smoothing factor.
-        - `logging_steps`: Number of steps between logging intermediate results.
-        - `save_steps`: Number of training steps between checkpoints and model upload.
-        - `save_total_limit`: Maximum number of checkpoints to keep.
-        - `optim`: Optimizer name, overwritten by DeepSpeed if used.
-        - `push_to_hub`: If `True`, model checkpoints are uploaded to HuggingFace Hub.
-        - `hub_model_id`: Name of the model on the HuggingFace Hub.
-        - `hub_private_repo`: If `True`, creates a private repository on the HuggingFace Hub.
-
-        Weights & Biases Integration:
-        - `report_to_wandb`: If `True`, logs metrics to Weights & Biases.
-        - `wandb_api_key`: API key for Weights & Biases.
-        - `wandb_project`: Project name on Weights & Biases.
-        - `wandb_entity`: Entity name (user or organization) on Weights & Biases.
 
         Returns:
             `str`: The Hugging Face hub model ID or the local file path to the LoRA model, depending on which is
