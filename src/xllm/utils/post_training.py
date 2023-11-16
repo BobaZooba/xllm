@@ -24,6 +24,7 @@ from transformers import AutoModelForCausalLM, PreTrainedModel, PreTrainedTokeni
 
 from ..core.config import Config
 from ..core.dependencies import build_tokenizer
+from ..utils.logger import dist_logger
 
 TOKENIZER_CONFIG_FILE = "tokenizer_config.json"
 
@@ -51,7 +52,17 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
         ValueError: If `config.hub_model_id` is `None` when attempting to push the fused model to the Hugging Face hub.
     """
 
+    model_loaded_in_int4 = False
+
     lora_model_name_or_path_for_fusing = config.lora_model_name_or_path_for_fusing
+
+    model_loading_additional_kwargs = dict()
+
+    if config.load_in_8bit:
+        model_loading_additional_kwargs["config.load_in_8bit"] = config.load_in_8bit
+    elif config.load_in_4bit:
+        model_loading_additional_kwargs["config.load_in_4bit"] = config.load_in_4bit
+        model_loaded_in_int4 = True
 
     tokenizer = build_tokenizer(config=config)
     logger.info(f"Tokenizer {config.correct_tokenizer_name_or_path} loaded")
@@ -59,9 +70,14 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
         pretrained_model_name_or_path=config.model_name_or_path,
         torch_dtype=config.dtype,
         trust_remote_code=config.trust_remote_code,
+        **model_loading_additional_kwargs,
     )
     logger.info(f"Model {config.model_name_or_path} loaded")
-    model = PeftModel.from_pretrained(model, lora_model_name_or_path_for_fusing)
+    model = PeftModel.from_pretrained(
+        model,
+        lora_model_name_or_path_for_fusing,
+        torch_dtype=config.dtype,
+    )
     logger.info(f"LoRA {lora_model_name_or_path_for_fusing} loaded")
     logger.info("Start fusing")
     model = model.merge_and_unload()
@@ -71,6 +87,12 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     if model_dtype != config.dtype:
         model = model.to(config.dtype)
         logger.info(f"Model converted to: {config.dtype}")
+
+    if model_loaded_in_int4:
+        dist_logger.warning(
+            "You load model in int4. It can't be serialized. There will be problems with saving the model "
+            "locally and uploading it to the Hugging Face Hub"
+        )
 
     if config.fused_model_local_path is not None:
         logger.info(f"Saving locally to {config.fused_model_local_path}")
@@ -93,8 +115,10 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
             with open(path_to_tokenizer_config, "w") as file_object:
                 json.dump(tokenizer_config, file_object, indent=2)
         logger.info(f"Model saved locally to {config.fused_model_local_path}")
+    else:
+        logger.info(f"Fused model will not be saved locally. Fused model localpath: {config.fused_model_local_path}.")
 
-    if config.push_to_hub or config.hub_model_id is not None:
+    if config.push_to_hub or (not config.push_to_hub and config.hub_model_id is not None):
         logger.info(f"Pushing model to the hub {config.hub_model_id}")
         if config.hub_model_id is not None:
             tokenizer.push_to_hub(
@@ -112,6 +136,8 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
                 push_to_hub_bos_add_bos_token(repo_id=config.hub_model_id)
         else:
             raise ValueError("Fused model push to hub failed, because config.hub_model_id if None")
+    else:
+        logger.info(f"Fused model will not be pushed to the hub. Hub model id: {config.hub_model_id}.")
 
     return tokenizer, model
 
