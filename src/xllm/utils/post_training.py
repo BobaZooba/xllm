@@ -59,9 +59,9 @@ def fuse_lora(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     model_loading_additional_kwargs = dict()
 
     if config.load_in_8bit:
-        model_loading_additional_kwargs["config.load_in_8bit"] = config.load_in_8bit
+        model_loading_additional_kwargs["load_in_8bit"] = config.load_in_8bit
     elif config.load_in_4bit:
-        model_loading_additional_kwargs["config.load_in_4bit"] = config.load_in_4bit
+        model_loading_additional_kwargs["load_in_4bit"] = config.load_in_4bit
         model_loaded_in_int4 = True
 
     tokenizer = build_tokenizer(config=config)
