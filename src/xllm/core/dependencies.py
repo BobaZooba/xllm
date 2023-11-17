@@ -241,7 +241,9 @@ def build_tokenizer(config: Config, use_fast: Optional[bool] = None) -> PreTrain
         kwargs["use_fast"] = use_fast
 
     tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_model_name_or_path=config.correct_tokenizer_name_or_path, **kwargs
+        pretrained_model_name_or_path=config.correct_tokenizer_name_or_path,
+        trust_remote_code=config.trust_remote_code,
+        **kwargs,
     )
 
     if tokenizer.pad_token is None:
