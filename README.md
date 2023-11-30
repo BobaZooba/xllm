@@ -209,6 +209,7 @@ Before that, you must log in to `W&B` or add an `API Token` to the environment v
   config = Config(
     model_name_or_path="HuggingFaceH4/zephyr-7b-beta",
     report_to_wandb=True,
+    logging_steps=5,
     wandb_project="xllm-demo",
     wandb_entity="bobazooba",
 )
