@@ -72,7 +72,7 @@ pip install xllm
 Version which include `deepspeed`, `flash-attn` and `auto-gptq`:
 
 ```sh
-pip install xllm[train]
+pip install "xllm[train]"
 ```
 
 Default `xllm` version recommended for local development, `xllm[train]` recommended for training.
@@ -239,7 +239,7 @@ You will be training larger models (for example 7B in colab), but at the expense
 This speeds up training and GPU memory consumption, but it does not work with all models and GPUs. You also need to
 install `flash-attn` for this. This can be done using:
 
-`pip install xllm[train]`
+`pip install "xllm[train]"`
 
   ```python
   config = Config(
