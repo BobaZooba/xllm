@@ -23,7 +23,7 @@ from tests.helpers.patches import patch_from_pretrained_auto_causal_lm, patch_tr
 def test_train(monkeypatch: MonkeyPatch, path_to_train_prepared_dummy_data: str, path_to_outputs: str):
     config = Config(
         push_to_hub=False,
-        deepspeed_stage=0,
+        deepspeed_stage="0",
         train_local_path_to_data=path_to_train_prepared_dummy_data,
         report_to_wandb=False,
         save_total_limit=0,

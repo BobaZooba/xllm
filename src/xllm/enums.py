@@ -69,6 +69,12 @@ class EnvironmentVariables:
     wandb_disabled: str = "WANDB_DISABLED"
     tokenizers_parallelism: str = "TOKENIZERS_PARALLELISM"
 
+    master_address: str = "MASTER_ADDR"
+    master_port: str = "MASTER_PORT"
+    rank: str = "RANK"
+    local_rank: str = "LOCAL_RANK"
+    world_size: str = "WORLD_SIZE"
+
 
 @dataclass
 class LogLevel:

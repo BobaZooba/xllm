@@ -62,17 +62,17 @@ def test_dtype():
 
 
 def test_deepspeed():
-    config = Config(deepspeed_stage=2)
+    config = Config(deepspeed_stage="2")
     assert config.deepspeed == STAGE_2
 
 
 def test_check_deepspeed():
-    config = Config(deepspeed_stage=0)
+    config = Config(deepspeed_stage="0")
     config.check_deepspeed()
 
 
 def test_check_deepspeed_exception():
-    config = Config(deepspeed_stage=2)
+    config = Config(deepspeed_stage="2")
     with pytest.raises(ImportError):
         config.check_deepspeed()
 
