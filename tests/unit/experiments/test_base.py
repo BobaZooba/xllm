@@ -25,7 +25,7 @@ from tests.helpers.patches import patch_from_pretrained_auto_causal_lm, patch_tr
 def test_base_experiment_init(monkeypatch: MonkeyPatch, path_to_train_dummy_data: str):
     config = Config(
         push_to_hub=False,
-        deepspeed_stage=0,
+        deepspeed_stage="0",
         train_local_path_to_data=path_to_train_dummy_data,
         tokenizer_name_or_path=LLAMA_TOKENIZER_DIR,
     )
@@ -37,7 +37,7 @@ def test_base_experiment_train(monkeypatch: MonkeyPatch, path_to_train_prepared_
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
     config = Config(
         push_to_hub=False,
-        deepspeed_stage=0,
+        deepspeed_stage="0",
         train_local_path_to_data=path_to_train_prepared_dummy_data,
         report_to_wandb=False,
         save_total_limit=0,

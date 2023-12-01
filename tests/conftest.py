@@ -158,7 +158,7 @@ def training_arguments(path_to_outputs: str) -> TrainingArguments:
 
 @pytest.fixture(scope="session")
 def config() -> Config:
-    hf_config = Config(deepspeed_stage=0)
+    hf_config = Config(deepspeed_stage="0")
     return hf_config
 
 

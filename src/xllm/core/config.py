@@ -180,7 +180,7 @@ class Config:
             dataset_key='my_dataset',
             gradient_accumulation_steps=8,
             max_length=512,
-            deepspeed_stage=3,
+            deepspeed_stage="3",
         )
         ```
 
@@ -247,8 +247,20 @@ class Config:
             "help": "HuggingFace Hub token. You can also set this key using .env file",
         },
     )
-    deepspeed_stage: int = field(
-        default=0,
+    single_gpu: Optional[bool] = field(
+        default=None,
+        metadata={
+            "help": "Indicates that you are learning on the same GPU. It is necessary to use DeepSpeed on a single GPU",
+        },
+    )
+    master_port: int = field(
+        default=9994,
+        metadata={
+            "help": "Master port for running DeepSpeed on a single GPU. Modify if RuntimeError: Address already in use",
+        },
+    )
+    deepspeed_stage: Optional[str] = field(
+        default=None,
         metadata={
             "help": "Predifined DeepSpeed stage",
         },
@@ -775,12 +787,22 @@ class Config:
 
         return None
 
+    def apply_deepspeed_single_gpu(self) -> None:
+        os.environ[enums.EnvironmentVariables.master_address] = "localhost"
+        os.environ[enums.EnvironmentVariables.master_port] = str(self.master_port)
+        os.environ[enums.EnvironmentVariables.rank] = "0"
+        os.environ[enums.EnvironmentVariables.local_rank] = "0"
+        os.environ[enums.EnvironmentVariables.world_size] = "1"
+
     def check_deepspeed(self) -> None:
         if self.deepspeed is not None:
             spec = find_spec("deepspeed")
 
             if spec is None:
                 raise ImportError("Deepspeed is not None, but failed to import deepspeed. Please install deepspeed.")
+
+            if self.single_gpu:
+                self.apply_deepspeed_single_gpu()
 
         return None
 
@@ -974,7 +996,7 @@ class Config:
             from xllm import Config
 
             # Assuming a predefined Config object with deepspeed specifications.
-            config = Config(deepspeed_stage=2)
+            config = Config(deepspeed_stage="2")
             ds_config = config.deepspeed
             # ds_config now contains the deepspeed configuration for stage 2.
             ```
@@ -985,10 +1007,18 @@ class Config:
             - If a custom deepspeed configuration file path is given and it exists, that configuration will be loaded
               and used.
         """
+        deepspeed_config: Optional[Dict[str, Any]] = None
+
+        if self.deepspeed_config_path is not None:
+            if os.path.isfile(self.deepspeed_config_path):
+                with open(self.deepspeed_config_path) as file_object:
+                    deepspeed_config = json.load(file_object)
+                    return deepspeed_config
+            else:
+                raise ValueError(f"deepspeed_config_path set to {self.deepspeed_config_path}, but not found")
+
         if self.deepspeed_stage in [0, "0", "stage_0"]:
             return None
-
-        deepspeed_config: Optional[Dict[str, Any]] = None
 
         if self.deepspeed_stage is not None:
             deepspeed_config = DS_CONFIG_MAPPER.get(self.deepspeed_stage, None)
@@ -996,13 +1026,6 @@ class Config:
                 raise ValueError(
                     f'Deepspeed stage "{self.deepspeed_stage}" not found in keys: {list(DS_CONFIG_MAPPER.keys())}'
                 )
-
-        if self.deepspeed_config_path is not None:
-            if os.path.isfile(self.deepspeed_config_path):
-                with open(self.deepspeed_config_path) as file_object:
-                    deepspeed_config = json.load(file_object)
-            else:
-                raise ValueError(f"deepspeed_config_path set to {self.deepspeed_config_path}, but not found")
 
         return deepspeed_config
 

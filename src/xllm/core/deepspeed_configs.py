@@ -158,13 +158,10 @@ STAGE_3 = {
 }
 
 DS_CONFIG_MAPPER: Dict[Union[str, int], Dict[str, Any]] = {
-    1: STAGE_1,
     "1": STAGE_1,
     "stage_1": STAGE_1,
-    2: STAGE_2,
     "2": STAGE_2,
     "stage_2": STAGE_2,
-    3: STAGE_3,
     "3": STAGE_3,
     "stage_3": STAGE_3,
 }
