@@ -54,7 +54,7 @@ install_requires = [
     "optimum>=1.12.0",
     "bitsandbytes>=0.41.1",
     "scipy",
-    "transformers",
+    "transformers>=4.35.2",
     "tqdm",
     "safetensors",
 ]
