@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from typing import Optional
 
 import pytest
 import torch
@@ -107,7 +108,7 @@ def test_config_post_init_hf_token(huggingface_hub_token: str):
 @pytest.mark.parametrize("wandb_api_key", ["some_wandb_api_key", "another_wandb_api_key"])
 @pytest.mark.parametrize("wandb_project", ["some_wandb_project", "another_wandb_project"])
 @pytest.mark.parametrize("wandb_entity", [None, "some_wandb_entity", "another_wandb_entity"])
-def test_config_post_init_wandb_report(wandb_api_key: str, wandb_project: str, wandb_entity: str):
+def test_config_post_init_wandb_report(wandb_api_key: str, wandb_project: str, wandb_entity: Optional[str]):
     config = Config(
         report_to_wandb=True,
         wandb_api_key=wandb_api_key,
@@ -135,3 +136,15 @@ def test_config_apply_deepspeed_single_gpu(master_port: int):
     assert os.environ[enums.EnvironmentVariables.rank] == "0"
     assert os.environ[enums.EnvironmentVariables.local_rank] == "0"
     assert os.environ[enums.EnvironmentVariables.world_size] == "1"
+
+
+@pytest.mark.parametrize("project_name", [None, "shurale"])
+@pytest.mark.parametrize("wandb_project", [None, "llama"])
+def test_correct_project_name(project_name: Optional[str], wandb_project: Optional[str]):
+    config = Config(project_name=project_name, wandb_project=wandb_project)
+    if project_name is None and wandb_project is None:
+        assert config.correct_project_name is None
+    elif project_name is not None:
+        assert config.correct_project_name == project_name
+    else:
+        assert config.correct_project_name == wandb_project

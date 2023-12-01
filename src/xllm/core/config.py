@@ -729,7 +729,13 @@ class Config:
         },
     )
 
-    # wandb
+    # training traction
+    project_name: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Project name for training traction services like W&B",
+        },
+    )
     report_to_wandb: bool = field(
         default=False,
         metadata={
@@ -745,7 +751,7 @@ class Config:
     wandb_project: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Weight & Biases project name",
+            "help": "Depreacted, use project_name. Weight & Biases project name",
         },
     )
     wandb_entity: Optional[str] = field(
@@ -769,7 +775,7 @@ class Config:
                 ],
                 [
                     self.wandb_api_key,
-                    self.wandb_project,
+                    self.correct_project_name,
                     self.wandb_entity,
                 ],
             ):
@@ -778,6 +784,22 @@ class Config:
                     dist_logger(message=f"Environment variable {key} set")
         else:
             os.environ[enums.EnvironmentVariables.wandb_disabled] = "true"
+
+    @property
+    def correct_project_name(self) -> Optional[str]:
+        if self.project_name is not None and self.wandb_project is not None:
+            dist_logger.warning(
+                message="You set both project_name and wandb_project."
+                "Priority set to project_name for experiment tracking"
+            )
+            return self.project_name
+        elif self.project_name is not None:
+            return self.project_name
+        elif self.wandb_project is not None:
+            dist_logger.warning(message="wandb_project is depreacted, please use project_name instead")
+            return self.wandb_project
+        else:
+            return None
 
     def check_hub(self) -> None:
         if self.push_to_hub and self.hub_model_id is None:
