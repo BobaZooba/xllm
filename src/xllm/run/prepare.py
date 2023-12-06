@@ -97,7 +97,7 @@ def prepare(config: Config) -> None:
 
     # tokenizer
     _ = AutoTokenizer.from_pretrained(config.correct_tokenizer_name_or_path)
-    logger.info(f"Tokenizer {config.correct_tokenizer_name_or_path} loaded")
+    logger.info(f"Tokenizer {config.correct_tokenizer_name_or_path} downloaded")
 
     # model
     cache_dir = None
@@ -182,4 +182,4 @@ def prepare(config: Config) -> None:
             f" {_add_variant(WEIGHTS_NAME, variant)}."
         )
 
-    logger.info(f"Model {config.model_name_or_path} loaded")
+    logger.info(f"Model {config.model_name_or_path} downloaded")
