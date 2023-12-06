@@ -13,21 +13,18 @@
 # limitations under the License.
 
 import json
-from typing import Tuple
 
 from loguru import logger
 from transformers import (
-    AutoModelForCausalLM,
     AutoTokenizer,
-    PreTrainedModel,
-    PreTrainedTokenizer,
 )
+from transformers.modeling_utils import CONFIG_NAME, cached_file
 
 from ..core.config import Config
 from ..datasets.registry import datasets_registry
 
 
-def prepare(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
+def prepare(config: Config) -> None:
     """
     Prepares the tokenizer and model for use from the provided configuration, and optionally prepares a dataset
     if specified.
@@ -89,10 +86,23 @@ def prepare(config: Config) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     else:
         logger.warning("Dataset is not prepared because this set in config")
 
-    tokenizer = AutoTokenizer.from_pretrained(config.correct_tokenizer_name_or_path)
+    # tokenizer
+    _ = AutoTokenizer.from_pretrained(config.correct_tokenizer_name_or_path)
     logger.info(f"Tokenizer {config.correct_tokenizer_name_or_path} loaded")
 
-    model = AutoModelForCausalLM.from_pretrained(config.model_name_or_path)
+    # model
+    cached_file(
+        config.model_name_or_path,
+        CONFIG_NAME,
+        cache_dir=None,
+        force_download=False,
+        resume_download=False,
+        proxies=None,
+        local_files_only=False,
+        token=None,
+        revision="main",
+        subfolder="",
+        _raise_exceptions_for_missing_entries=False,
+        _raise_exceptions_for_connection_errors=False,
+    )
     logger.info(f"Model {config.model_name_or_path} loaded")
-
-    return tokenizer, model

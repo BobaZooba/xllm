@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Tuple, Type
+from typing import Type
 
-from transformers import HfArgumentParser, PreTrainedModel, PreTrainedTokenizer
+from transformers import HfArgumentParser
 
 from ..core.config import Config
 from ..run.prepare import prepare
@@ -23,7 +23,7 @@ from ..utils.cli import setup_cli
 
 def cli_run_prepare(
     config_cls: Type[Config] = Config,
-) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
+) -> None:
     """
     Provides a command-line interface (CLI) entry point for setting up a tokenizer and model based on a configuration.
 
@@ -64,8 +64,7 @@ def cli_run_prepare(
     parser = HfArgumentParser(config_cls)
     config = parser.parse_args_into_dataclasses()[0]
     setup_cli(config=config, logger_path="./xllm_prepare.log")
-    tokenizer, model = prepare(config=config)
-    return tokenizer, model
+    prepare(config=config)
 
 
 if __name__ == "__main__":
