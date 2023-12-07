@@ -581,8 +581,18 @@ at [bobazooba@gmail.com](mailto:bobazooba@gmail.com). I'd love to hear from you.
 
 Write to us so that we can add your project.
 
-- [Shurale7B-v1](https://huggingface.co/BobaZooba/Shurale7b-v1)
-- [Shurale7B-v1-GPTQ](https://huggingface.co/BobaZooba/Shurale7b-v1-GPTQ)
+- [TachyHealth/Thealth](https://huggingface.co/TachyHealth)
+  - [TachyHealth/Thealth-llama-7b_v1](https://huggingface.co/TachyHealth/Thealth-llama-7b_v1)
+  - [TachyHealth/Thealth-llama-13b](https://huggingface.co/TachyHealth/Thealth-llama-13b)
+  - [TachyHealth/Thealth-Yi-6b_v1](https://huggingface.co/TachyHealth/Thealth-Yi-6b_v1)
+  - [TachyHealth/Thealth-Yi-6b_v2](https://huggingface.co/TachyHealth/Thealth-Yi-6b_v2)
+  - [TachyHealth/Thealth-zypher-7b_v1](https://huggingface.co/TachyHealth/Thealth-zypher-7b_v1)
+  - [TachyHealth/Thealth-Zypher-7b_v2](https://huggingface.co/TachyHealth/Thealth-Zypher-7b_v2)
+  - [TachyHealth/Thealth-Falcon-7b](https://huggingface.co/TachyHealth/Thealth-Falcon-7b)
+  - [TachyHealth/Thealth-Mistral-7b](https://huggingface.co/TachyHealth/Thealth-Mistral-7b)
+- Shurale
+  - [Shurale7B-v1](https://huggingface.co/BobaZooba/Shurale7b-v1)
+  - [Shurale7B-v1-GPTQ](https://huggingface.co/BobaZooba/Shurale7b-v1-GPTQ)
 
 ## Badge
 
