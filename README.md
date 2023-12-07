@@ -590,7 +590,7 @@ Write to us so that we can add your project.
   - [TachyHealth/Thealth-Zypher-7b_v2](https://huggingface.co/TachyHealth/Thealth-Zypher-7b_v2)
   - [TachyHealth/Thealth-Falcon-7b](https://huggingface.co/TachyHealth/Thealth-Falcon-7b)
   - [TachyHealth/Thealth-Mistral-7b](https://huggingface.co/TachyHealth/Thealth-Mistral-7b)
-- Shurale
+- [Shurale](https://github.com/BobaZooba/shurale)
   - [Shurale7B-v1](https://huggingface.co/BobaZooba/Shurale7b-v1)
   - [Shurale7B-v1-GPTQ](https://huggingface.co/BobaZooba/Shurale7b-v1-GPTQ)
 
@@ -612,7 +612,7 @@ well as funding for machine maintenance.
 
 # Future Work 🔮
 
-- Add more testst
+- Add more tests
 - Add RunPod deploy function
 - Add [DPO](https://arxiv.org/abs/2305.18290) components
 - Add Callbacks to `Experiment`
