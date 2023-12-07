@@ -609,6 +609,7 @@ For Hugging Face Hub model card:
 ```
 
 It will be looks like this:
+
 [<img src="https://github.com/BobaZooba/xllm/blob/main/static/images/xllm-badge.png" alt="Powered by X—LLM" width="175" height="32"/>](https://github.com/BobaZooba/xllm)
 
 # Testing 🧪
