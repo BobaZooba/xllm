@@ -598,10 +598,17 @@ Write to us so that we can add your project.
 
 Consider adding a badge to your model card.
 
+For Github project:
 ```sh
 [<img src="https://github.com/BobaZooba/xllm/blob/main/static/images/xllm-badge.png" alt="Powered by X—LLM" width="175" height="32"/>](https://github.com/BobaZooba/xllm)
 ```
 
+For Hugging Face Hub model card:
+```sh
+[<img src="https://cdn-uploads.huggingface.co/production/uploads/6074d5f1134c000d1ae10d42/JudU3rrPP5i87CfwINANO.png" alt="Powered by X—LLM" width="175" height="32"/>](https://github.com/BobaZooba/xllm)
+```
+
+It will be looks like this:
 [<img src="https://github.com/BobaZooba/xllm/blob/main/static/images/xllm-badge.png" alt="Powered by X—LLM" width="175" height="32"/>](https://github.com/BobaZooba/xllm)
 
 # Testing 🧪
