@@ -246,6 +246,12 @@ def build_tokenizer(config: Config, use_fast: Optional[bool] = None) -> PreTrain
         **kwargs,
     )
 
+    if config.tokenizer_padding_token is not None:
+        tokenizer.pad_token = config.tokenizer_padding_token
+        dist_logger.info(
+            f"Overrode tokenizer pad token with {config.tokenizer_padding_token}", local_rank=config.local_rank
+        )
+
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         dist_logger.info(message="Tokenizer pad token set to eos token", local_rank=config.local_rank)

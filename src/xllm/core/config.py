@@ -430,6 +430,12 @@ class Config:
             "help": "Padding side of the collator: None, right or left",
         },
     )
+    tokenizer_padding_token: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Padding token for tokenizer",
+        },
+    )
 
     # collator
     collator_key: str = field(
