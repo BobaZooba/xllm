@@ -42,6 +42,7 @@ class Datasets:
     default: str = "default"
     general: str = "general"
     soda: str = "soda"
+    input_output: str = "input_output"
 
 
 @dataclass
