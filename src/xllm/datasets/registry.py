@@ -16,9 +16,11 @@ from .. import enums
 from ..datasets.general import GeneralDataset
 from ..datasets.soda import SodaDataset
 from ..utils.registry import Registry
+from ..datasets.input_output import InputOuput
 
 datasets_registry = Registry(name=enums.Registry.datasets)
 
 datasets_registry.add(key=enums.Datasets.default, value=GeneralDataset)
 datasets_registry.add(key=enums.Datasets.general, value=GeneralDataset)
+datasets_registry.add(key=enums.Datasets.input_output, value=InputOuput)
 datasets_registry.add(key=enums.Datasets.soda, value=SodaDataset)
