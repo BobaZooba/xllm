@@ -19,8 +19,8 @@ def prepare_data(dataset):
         data.append({
             "text": (
             f"[INST] Réponds à la question suivante en t'appuyant exclusivement sur le document fourni:"
-            f" {sample['question']} documents: {' '.join([doc['source_text'] for doc in sample['context']])} [/INST]"
-            f"123target: {sample['answer'].strip()} </s></s>"
+            f" {sample['question']} documents: {' '.join([doc['source_text'] for doc in sample['context']]).strip()} [/INST]"
+            f"123target: {sample['answer'].strip()} </s>"
             )
             })
     return data
@@ -28,7 +28,7 @@ def prepare_data(dataset):
 
 if __name__ == "__main__":
 
-    dataset = load_dataset("ProfessorBob/cquae_v2", token='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')
+    dataset = load_dataset("LsTam/cquae_under1024", token='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')
     train_dataset = GeneralDataset(data=prepare_data(dataset['train']), separator="123target: ")
     eval_dataset = GeneralDataset(data=prepare_data(dataset['eval']), separator="123target: ")
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         use_gradient_checkpointing=True,
         stabilize=True,
         use_flash_attention_2=True,
-        load_in_4bit=True, # cahnge to 8 after testing
+        load_in_4bit=True, # change to 8 after testing
         prepare_model_for_kbit_training=True,
         apply_lora=True,
         # one step is one batch
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
         push_to_hub=True,
         hub_private_repo=True,
-        hub_model_id="LsTam/mistral-xllm-7B-LoRA-cquae_v2_twostoptoken",
+        hub_model_id="LsTam/mistral-xllm-7B-LoRA-cquae_v2_under1024",
 
         # W&B
         # TODO make w&b offline
